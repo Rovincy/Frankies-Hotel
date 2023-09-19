@@ -24,6 +24,7 @@ import "./index.css"
 import "./cellColor.css"
 import { useNavigate } from 'react-router-dom'
 import { date } from 'yup'
+import dayjs from "dayjs";
 // var time = '2023-09-28';
 //Editing editor buttons
 L10n.load({
@@ -616,12 +617,20 @@ const Calendar = () => {
         <div className='control-wrapper'>
         <ScheduleComponent 
           cssClass='timeline-resource' 
-          // dateFormat='dd MM yyyy' 
-          currentView='TimelineMonth'  
-          // selectedDate={new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDay())}
-          // minDate={'2023-09-06'}
-          // maxDate={new Date()+1}
-          // workDays={4}
+          // dateFormat='dd MM yyyy'
+          currentView='TimelineMonth'
+          //default date and interval
+            
+          selectedDate={dayjs().format('YYYY-MM-DD')}
+          minDate={dayjs().subtract(1, 'day')}
+          //+1 month
+            maxDate={dayjs().add(2, 'month')}
+          // dateValue={"2023-09-20"}
+
+
+          //show only days between min and max visible
+            // showWeekend={true
+            // showWeekend={
           // selectedDate = {new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDay())}
           // maxDate = {new Date(new Date().getFullYear(), new Date().getMonth(), 27)}
           // dateValue = {new Date(new Date().setDate(14))}
@@ -705,7 +714,11 @@ const Calendar = () => {
                             </ResourceDirective>
                         </ResourcesDirective>
                         <ViewsDirective>
-                            <ViewDirective option='TimelineMonth'/>
+                            <ViewDirective option='TimelineMonth'
+                                           interval={3}
+                                           selectedDate={dayjs()}
+                                              // showWeekend={true}
+                            />
                         </ViewsDirective>
                         <Inject services={[TimelineViews,TimelineMonth,Week, Month, Resize, DragAndDrop]}/>
                     </ScheduleComponent>
