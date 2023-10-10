@@ -109,7 +109,7 @@ const WalkInPlanning = () => {
 
   const handleButtonClick = (buttonName: SetStateAction<string>) => {
     setActiveButton(buttonName);
-    console.log(`${buttonName} button clicked!`);
+    // console.log(`${buttonName} button clicked!`);
   };
 
   const renderPage = () => {

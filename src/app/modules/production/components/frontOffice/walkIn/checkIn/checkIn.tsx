@@ -416,11 +416,15 @@ const CheckIn = () => {
           <a href='#' className='btn btn-light-success btn-sm' onClick={() => addService(record)}>
             Services
           </a>
-          <a href='#' className='btn btn-light-dark btn-sm' onClick={() => generateBill(record)}>
-            Generate Bill
+          <a href='#' className='btn btn-light-dark btn-sm' onClick={() => ''}>
+          {/* <a href='#' className='btn btn-light-dark btn-sm' onClick={() => generateBill(record)}> */}
+            Transfer
             {/* {spinner?"Generate Bill":<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin rev={undefined} />} />} */}
           </a>
-          <a
+          <Link to={`/Billing/${record.guestId}`} className='btn btn-light-primary btn-sm'>
+          Check Out
+        </Link>
+          {/* <a
             href='#'
             className='btn btn-light-primary btn-sm'
             onClick={() =>
@@ -432,7 +436,7 @@ const CheckIn = () => {
             }
           >
             Check Out
-          </a>
+          </a> */}
           {/*      
         <Space size='middle'>
           {/* <Link to={`/notes-form/${record.id}`}>
@@ -1119,7 +1123,7 @@ const CheckIn = () => {
           <Modal
             open={openAddServiceModal}
             okText='Confirm'
-            title='Add Service '
+            title='Add Service'
             closable={true}
             onCancel={cancelNoteModal}
             onOk={handleOk}

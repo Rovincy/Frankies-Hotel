@@ -80,6 +80,10 @@ import ReportComponent from '../modules/production/components/Reports/ReportComp
 import RoomHistoryReport from '../modules/production/components/report/EmployeeListReport'
 import { Users } from '../modules/production/components/setup/users/Users'
 import { UsersForm } from '../modules/production/components/setup/users/UsersForm'
+import { Roles } from '../modules/production/components/setup/roles/roles'
+import { RolesForm } from '../modules/production/components/setup/roles/RolesForm'
+import { Currency } from '../modules/production/components/setup/Currency/currency'
+import { CurrencyForm } from '../modules/production/components/setup/Currency/currencyForm'
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -95,12 +99,12 @@ const PrivateRoutes = () => {
     <Routes>
       <Route element={<MasterLayout />}>
         {/* Redirect to Dashboard after success login/registartion */}
-        <Route path='auth/*' element={<Navigate to='/hr-dashboard' />} />
+        <Route path='auth/*' element={<Navigate to='/dashboard' />} />
         {/* Pages */}
-        <Route path='dashboard' element={<DashboardWrapper />} />
         {/* <Route path='dashboard' element={<DashboardWrapper />} /> */}
-        <Route path='payroll-dashboard' element={<PayrollDashboardWrapper />} />
-        <Route path='hr-dashboard' element={<HRDashboardWrapper />} />
+        {/* <Route path='dashboard' element={<DashboardWrapper />} /> */}
+        {/* <Route path='payroll-dashboard' element={<PayrollDashboardWrapper />} /> */}
+        <Route path='/dashboard' element={<HRDashboardWrapper />} />
 
         {/* Employee  */}
 
@@ -171,6 +175,24 @@ const PrivateRoutes = () => {
           }
         />
         <Route
+          path='currency/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Currency</PageTitle>
+              <Currency />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='currencyForm/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Currency</PageTitle>
+              <CurrencyForm />
+            </SuspensedView>
+          }
+        />
+        <Route
           path='guest-form/*'
           element={
             <SuspensedView>
@@ -204,7 +226,7 @@ const PrivateRoutes = () => {
           path='billing/*'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>Bill</PageTitle>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Billing</PageTitle>
               {/* <FileUploadForm /> */}
               <Billing/>
             </SuspensedView>
@@ -316,17 +338,35 @@ const PrivateRoutes = () => {
           path='/users'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>Guest Service</PageTitle>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Users</PageTitle>
               <Users/>
             </SuspensedView>
           }
         />
+          <Route
+           path='/usersForm'
+           element={
+             <SuspensedView>
+               <PageTitle breadcrumbs={accountBreadCrumbs}>User Registration</PageTitle>
+               <UsersForm/>
+             </SuspensedView>
+           }
+         />
          <Route
-          path='/usersForm'
+          path='/roles'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>Guest Service</PageTitle>
-              <UsersForm/>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Roles</PageTitle>
+              <Roles/>
+            </SuspensedView>
+          }
+        />
+         <Route
+          path='/rolesForm'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>New Role</PageTitle>
+              <RolesForm/>
             </SuspensedView>
           }
         />

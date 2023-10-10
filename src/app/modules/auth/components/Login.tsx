@@ -6,13 +6,14 @@ import {Link} from 'react-router-dom'
 import {useFormik} from 'formik'
 import {getUserByToken, login} from '../core/_requests'
 import {useAuth} from '../core/Auth'
+import jwtDecode from 'jwt-decode';
+import { UserModel } from '../core/_models'
 
 const loginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email('Wrong ID')
+  username: Yup.string()
     .min(3, 'Minimum 3 symbols')
     .max(50, 'Maximum 50 symbols')
-    .required('ID is required'),
+    .required('Username is required'),
   password: Yup.string()
     .min(3, 'Minimum 3 symbols')
     .max(50, 'Maximum 50 symbols')
@@ -21,8 +22,8 @@ const loginSchema = Yup.object().shape({
 })
 
 const initialValues = {
-  email: 'User ID',
-  password: 'admin',
+  username: '',
+  password: '',
 }
 
 /*
@@ -39,11 +40,35 @@ export function Login() {
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, {setStatus, setSubmitting}) => {
+      console.log(values)
       setLoading(true)
       try {
-        const {data: auth} = await login(values.email, values.password)
+        const {data: auth} = await login(values.username, values.password)
+        console.log(auth)
         saveAuth(auth)
-        const {data: user} = await getUserByToken(auth.api_token)
+        // console.log(auth.jwtToken);
+        // console.log(auth.api_token);
+        // const decodedToken = jwtDecode(auth.jwtToken)
+        // console.log(decodedToken);
+        // const {data: user} = await jwtDecode(auth.jwtToken)
+        
+        const decodedToken:any = jwtDecode(auth.jwtToken)
+        // console.log(decodedToken);
+        // const {data: user} = await getUserByToken(auth.api_token)
+        // Create a new instance of UserModel and populate it with the data
+        // const user = new UserModel(decodedToken.id, decodedToken.username, userData.email,decodedToken.lastName,decodedToken.firstName);
+        const user: UserModel = {
+          id: decodedToken.id,
+          username: decodedToken.username,
+          email: decodedToken.email,
+          lastName: decodedToken.lastName,
+          firstName: decodedToken.firstName,
+          password: decodedToken.password
+          // fill in the rest of the fields as necessary
+      };
+      console.log('user: ',user)
+
+        // setCurrentUser(user)
         setCurrentUser(user)
       } catch (error) {
         console.error(error)
@@ -82,26 +107,26 @@ export function Login() {
 
       {/* begin::Form group */}
       <div className='fv-row mb-10'>
-        <label className='form-label fs-6 fw-bolder text-dark'>USER ID</label>
+        <label className='form-label fs-6 fw-bolder text-dark'>USERNAME</label>
         <input
-          placeholder='User ID'
-          {...formik.getFieldProps('email')}
+          placeholder='Username'
+          {...formik.getFieldProps('username')}
           className={clsx(
             'form-control form-control-lg form-control-solid',
-            {'is-invalid': formik.touched.email && formik.errors.email},
-            {
-              'is-valid': formik.touched.email && !formik.errors.email,
-            }
+            // {'is-invalid': formik.touched.username && formik.errors.username},
+            // {
+            //   'is-valid': formik.touched.username && !formik.errors.username,
+            // }
           )}
           type='text'
-          name='email'
+          name='username'
           autoComplete='off'
         />
-        {formik.touched.email && formik.errors.email && (
+        {/* {formik.touched.username && formik.errors.username && (
           <div className='fv-plugins-message-container'>
-            <span role='alert'>{formik.errors.email}</span>
+            <span role='alert'>{formik.errors.username}</span>
           </div>
-        )}
+        )} */}
       </div>
       {/* end::Form group */}
 
@@ -113,13 +138,13 @@ export function Login() {
             <label className='form-label fw-bolder text-dark fs-6 mb-0'>Password</label>
             {/* end::Label */}
             {/* begin::Link */}
-            <Link
+            {/* <Link
               to='/auth/forgot-password'
               className='link-primary fs-6 fw-bolder'
               style={{marginLeft: '5px'}}
             >
               Forgot Password ?
-            </Link>
+            </Link> */}
             {/* end::Link */}
           </div>
         </div>
@@ -129,12 +154,12 @@ export function Login() {
           {...formik.getFieldProps('password')}
           className={clsx(
             'form-control form-control-lg form-control-solid',
-            {
-              'is-invalid': formik.touched.password && formik.errors.password,
-            },
-            {
-              'is-valid': formik.touched.password && !formik.errors.password,
-            }
+            // {
+            //   'is-invalid': formik.touched.password && formik.errors.password,
+            // },
+            // {
+            //   'is-valid': formik.touched.password && !formik.errors.password,
+            // }
           )}
         />
         {formik.touched.password && formik.errors.password && (

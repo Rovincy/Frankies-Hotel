@@ -1,14 +1,16 @@
 import {useState} from 'react'
+import {useMutation, useQuery, useQueryClient} from 'react-query'
 import {Link} from 'react-router-dom'
 // import './formStyle.css'
 import type {RcFile, UploadFile, UploadProps} from 'antd/es/upload/interface'
 import {UploadOutlined} from '@ant-design/icons'
-import {Button, Upload} from 'antd'
+import {Button, Upload, message} from 'antd'
 import {useForm} from 'react-hook-form'
 import axios from 'axios'
-import {Api_Endpoint} from '../../../../../services/ApiCalls'
-import {useQuery} from 'react-query'
+import {Api_Endpoint, fetchRolesApi} from '../../../../../services/ApiCalls'
 import {useNavigate, Navigate} from 'react-router-dom'
+import { BASE_URL } from '../../../urls'
+import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns'
 
 const UsersForm = () => {
   const [formData, setFormData] = useState({})
@@ -16,7 +18,22 @@ const UsersForm = () => {
   const {register, reset, handleSubmit} = useForm()
   const [loading, setLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<any>(null)
+  const {data: userRoles, isLoading: userRolesLoad} = useQuery('roles', fetchRolesApi)
+  const {mutate: addNewUser} = useMutation((values)=>axios.post(`${BASE_URL}/users`,values), {
+    onSuccess:()=>{
+      message.success("User registered successfully")
+      // queryClient.invalidateQueries('bookings')
+      // queryClient.invalidateQueries('rooms')
+      // queryClient.invalidateQueries('guests')
+      // scheduleObj.current.refreshTemplates()
+      // scheduleObj.current.refreshLayout()
+      navigate('/users')
+    },
+    onError:(error: any)=>{
+      console.log(error)
+      message.error("Registration failed")
+    }
+  })
   const handleTabClick = (tab: any) => {
     setActiveTab(tab)
   }
@@ -57,7 +74,8 @@ const UsersForm = () => {
     imgWindow?.document.write(image.outerHTML)
   }
 
-  const url = `${Api_Endpoint}/guests`
+  // const url = `${Api_Endpoint}/users`
+
   // const OnSUbmit = handleSubmit( async (values, event)=> {
   //   event?.preventDefault();
   //   setLoading(true)
@@ -91,34 +109,48 @@ const UsersForm = () => {
   const OnSubmit = handleSubmit(async (values, event) => {
     event?.preventDefault()
     setLoading(true)
-
-    const formData = new FormData()
-    formData.append('firstName', values.firstName)
-    formData.append('lastname', values.lastname)
-    formData.append('email', values.email)
-    formData.append('account', values.account)
-    formData.append('gender', values.gender)
-    formData.append('dob', values.dob)
-    formData.append('phoneNumber', values.phoneNumber)
-    formData.append('idType', values.idType)
-    formData.append('nationality', values.nationality)
-    formData.append('idNumber', values.idNumber)
-    if (fileList[0]?.originFileObj) {
-      const file = fileList[0].originFileObj as File
-      formData.append('file', file)
-    }
+    // console.log(values)
+    // const formData = new FormData()
+    // formData.append('firstName', values.firstName)
+    // formData.append('lastname', values.lastname)
+    // formData.append('email', values.email)
+    // formData.append('role', values.email)
+    // formData.append('gender', values.email)
+    // formData.append('username', values.username)
+    // formData.append('password', values.password)
+    // if (fileList[0]?.originFileObj) {
+    //   const file = fileList[0].originFileObj as File
+    //   formData.append('file', file)
+    // }
 
     // formData.append("file", fileList[0]?.originFileObj);
 
     try {
-      const response = await axios.post(url, formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
-      })
+      // const response = await axios.post(url, formData, {
+      //   headers: {'Content-Type': 'multipart/form-data'},
+      // })
 
-      setSubmitLoading(false)
-      reset()
-      navigate('/grm/Guests/', {replace: true})
-      return response.statusText
+      // setSubmitLoading(false)
+      // reset()
+      // navigate('/users', {replace: true})
+      // return response.statusText
+      const dat =  userRoles?.data.find((e: { id: any })=>e.id===values.role)
+      const userDetails:any = {
+        // room: roomsdata?.data[args?.data?.Id-1]?.id,
+        firstName:values.firstName,
+        lastName: values.lastname,
+        email:values.email,
+        // role:values.email,
+        // gender:values.email,
+        roleId: dat['id'],
+        username:values.username,
+        password:values.password
+        // gameTypeId: data.gameType,
+      }
+
+      // console.log('bookingSchedule', bookingSchedule)
+      // mutateGameSchedule(gameSchedule)
+      addNewUser(userDetails)
     } catch (error: any) {
       setSubmitLoading(false)
       return error.statusText
@@ -184,24 +216,44 @@ const UsersForm = () => {
                   />
                 </div>
               </div>
-              
-              
               <div className='row mb-0'>
-                <div className='col-4 mb-7'>
-                  <label htmlFor='exampleFormControlInput1' className=' form-label'>
-                    Gender
+              <div className='col-4 mb-7'>
+                  <label htmlFor='exampleFormControlInput1' className='required form-label'>
+                    Username
                   </label>
-                  <select
-                    {...register('gender')}
-                    className='form-select form-select-solid'
-                    aria-label='Select example'
-                  >
-                    <option>select </option>
-                    <option value='MALE'>MALE</option>
-                    <option value='FEMALE'>FEMALE</option>
-                  </select>
+                  <input
+                    type='text'
+                    {...register('username')}
+                    className='form-control form-control-solid'
+                  />
+                </div>
+                <div className='col-4 mb-7'>
+                  <label htmlFor='exampleFormControlInput1' className='required form-label'>
+                    Password
+                  </label>
+                  <input
+                    type='text'
+                    {...register('password')}
+                    className='form-control form-control-solid'
+                  />
+                </div>
+                <div className='col-4 mb-7'>
+                <label htmlFor='exampleFormControlInput1' className='required form-label'>
+                    Role
+                  </label>
+                  <DropDownListComponent
+                id='role'
+                placeholder='User Role'
+                {...register('role')}
+                className='form-control form-control-solid'
+                dataSource={userRoles?.data}
+                fields={{text: 'name', value: 'id'}}
+                // value={props && props.gameTypeId ? props.gameTypeId : null}
+                style={{width: '100%'}}
+              />
                 </div>
               </div>
+              
             </div>
           )}
         </div>

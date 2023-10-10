@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
-// export const Api_Endpoint = 'https://localhost:5001/api'
+// export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
+export const Api_Endpoint = 'https://localhost:5001/api'
 
 export const fetchRoomsTypes = () => {
   return axios.get(`${Api_Endpoint}/roomsType`)
@@ -9,11 +9,17 @@ export const fetchRoomsTypes = () => {
 export const fetchRooms = () => {
   return axios.get(`${Api_Endpoint}/rooms`)
 }
+export const fetchCurrencies = () => {
+  return axios.get(`${Api_Endpoint}/Currency`)
+}
 export const fetchServiceCategoryApi = () => {
   return axios.get(`${Api_Endpoint}/Service`)
 }
 export const fetchUsersApi = () => {
   return axios.get(`${Api_Endpoint}/users`)
+}
+export const fetchRolesApi = () => {
+  return axios.get(`${Api_Endpoint}/users/role`)
 }
 export const fetchGuests = () => {
   return axios.get(`${Api_Endpoint}/guests`)
@@ -23,6 +29,9 @@ export const fetchNotes = () => {
 }
 export const fetchBookings = () => {
   return axios.get(`${Api_Endpoint}/Booking`)
+}
+export const fetchGuestBilling = (id: any) => {
+  return axios.get(`${Api_Endpoint}/Billing/id?id=${id}`, id)
 }
 export const currencyConverterApi = (From: string, To: string) => {
   const headers = {
@@ -72,6 +81,9 @@ export const addServiceApi = (values: any) => {
 export const addGuestServiceApi = (values: any) => {
   return axios.post(`${Api_Endpoint}/GuestService/`, values)
 }
+export const addGuestBilling = (values: any) => {
+  return axios.post(`${Api_Endpoint}/Billing/`, values)
+}
 export const addHouseItemApi = (values: any) => {
   return axios.post(`${Api_Endpoint}/HouseKeeping/`, values)
 }
@@ -82,13 +94,18 @@ export const cancelBookingApi = (id: any) => {
 export const deleteRoomTypeApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/RoomsType/${id}`, id)
 }
+
 export const deleteServiceiceCategoryApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/Service/${id}`, id)
 }
 export const deleteUserApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/users/${id}`, id)
 }
+
+export const deleteRoleApi = (id: any) => {
+  return axios.delete(`${Api_Endpoint}/users/deleteRole?id=${id}`, id)
+}
+
 export const updateGuestApi=(serviceId:any)=>{
  return  axios.put(`${Api_Endpoint}/GuestService/serviceId?serviceId=${serviceId}`, serviceId)
-
 }

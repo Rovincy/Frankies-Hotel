@@ -23,7 +23,6 @@ import { BASE_URL } from '../../../../urls'
 import "./index.css"
 import "./cellColor.css"
 import { useNavigate } from 'react-router-dom'
-import { date } from 'yup'
 import dayjs from "dayjs";
 // var time = '2023-09-28';
 //Editing editor buttons
@@ -31,7 +30,7 @@ L10n.load({
   'en-US': {
     schedule: {
       saveButton: 'Book',
-      cancelButton: 'Proceed',
+      cancelButton: 'Close',
       deleteButton: 'Cancel booking',
       newEvent: 'Book Room',
     },
@@ -94,7 +93,7 @@ const Calendar = () => {
 
 
   const onActionBegin = (args) => {
-    console.log('first args', args)
+    // console.log('first args', args)
     // args.cancel = true
     // console.log('args', args)
     if (args.data !== undefined) {
@@ -110,10 +109,10 @@ const Calendar = () => {
       // }
       //Save
       if (args.requestType === 'eventCreate') {
-        console.log("This one here")
-        console.log("data: ",data)
+        // console.log("This one here")
+        // console.log("data: ",data)
         if(data.guests===null){
-          console.log('No guest selected')
+          // console.log('No guest selected')
           const bookingSchedule = {
             // room: roomsdata?.data[args?.data?.Id-1]?.id,
             roomId: dat['id'],
@@ -180,7 +179,7 @@ const Calendar = () => {
 
       //Edit
       if (args.requestType === 'eventChange') {
-        console.log('gameSchedule Edit', args)
+        // console.log('gameSchedule Edit', args)
         const gameSchedule = {
           id: data.id,
           subject: data.Subject,
@@ -215,7 +214,7 @@ const Calendar = () => {
       if (args.requestType === 'eventRemove') {
         // deleteGameSchedule(data)
         // console.log('Event Remove', args)
-        console.log('Removing item with id=', args.data[0].Id)
+        // console.log('Removing item with id=', args.data[0].Id)
         CancelBooking(args.data[0].Id,{
           onSuccess:()=>{
             message.success("Booking cancelled successfully")
@@ -237,6 +236,8 @@ const Calendar = () => {
   let dropDownListObject //to access the dropdownlist component
   function editorTemplate(props) {
     // const roomName = roomsdata?.data.find(item => item.id === props.RoomId)
+    // console.log('props: ',props)
+    // console.log('props: ',props['Subject'])
     var roomName;
     roomsdata?.data.find((item)=>{
       if(item['id']==props.RoomId){
@@ -244,13 +245,13 @@ const Calendar = () => {
         return item.name;
       }
     })
+    // console.log('props: ',props)
     var startT = props['StartTime'];
     var Room = props['Name'];
     return props !== undefined ? (
       <table className='custom-event-editor' style={{width: '100%'}} cellPadding={5}>
         <tbody>
-        {/* /////*******New Guest*********** */}
-        <td className='e-textlabel'>New Guest</td>
+         <td className='e-textlabel'>New Guest</td>
         <tr>
             <td className='required e-textlabel'>FirstName</td>
             <td colSpan={4}>
@@ -327,21 +328,8 @@ const Calendar = () => {
                 style={{width: '100%'}}
               />
             </td>
-            {/* <td colSpan={4}>
-            <select
-                    // {...register('gender')}
-                    className='form-select form-select-solid'
-                    aria-label='Select example'
-                    id='Gender'
-                    data-name='Gender'
-                  >
-                    <option>select </option>
-                    <option value='MALE'>MALE</option>
-                    <option value='FEMALE'>FEMALE</option>
-                  </select>
-            </td> */}
           </tr>
-          <tr>
+          D'accord<tr>
             <td className='required e-textlabel'>ID Type</td>
             <td colSpan={4}>
               <DropDownListComponent
@@ -349,26 +337,12 @@ const Calendar = () => {
                 placeholder='ID Type'
                 data-name='IDType'
                 className='e-field'
-                dataSource={[{name: 'PASSWORD', id: 'PASSWORD'},{name: 'LICENCE', id: 'LICENCE'},{name: 'NATIONAL ID', id: 'NATIONAL ID'}]}
+                dataSource={[{name: 'PASSPORT', id: 'PASSPORT'},{name: 'LICENCE', id: 'LICENCE'},{name: 'NATIONAL ID', id: 'NATIONAL ID'}]}
                 fields={{text: 'name', value: 'id'}}
                 // value={props && props.gameTypeId ? props.gameTypeId : null}
                 style={{width: '100%'}}
               />
             </td>
-            {/* <td colSpan={4}>
-            <select
-                    // {...register('idType')}
-                    className='form-select form-select-solid'
-                    id='IDType'
-                    data-name='IDType'
-                    aria-label='Select example'
-                  >
-                    <option>select </option>
-                    <option value='PASSPORT'>PASSPORT</option>
-                    <option value='LICENCE'>LICENCE</option>
-                    <option value='NATIONAL ID'>NATIONAL ID</option>
-                  </select>
-            </td> */}
           </tr>
           <tr>
             <td className='required e-textlabel'>ID Number</td>
@@ -395,7 +369,6 @@ const Calendar = () => {
                 />
             </td>
           </tr>
-          {/* /////*******Registered Guest*********** */}
         <td className='e-textlabel'>Registered Guest</td>
               <tr>
         <td className='e-textlabel'>Room</td>
@@ -412,17 +385,6 @@ const Calendar = () => {
             // defaultValue={roomsdata?.data[props.RoomId-1]?.name}
             disabled
           />
-          {/* <input
-            id='title'
-            placeholder='Room'
-            data-name='Room'
-            name='Room'
-            className='e-field e-input'
-            type='text'
-            style={{width: '100%'}}
-            defaultValue={roomsdata?.data[props['Name']-1]?.name}
-            disabled
-          /> */}
         </td>
       </tr>
 
@@ -604,7 +566,7 @@ const Calendar = () => {
   //       })
   //   }
   const OnPopupClose=(args)=>{
-    console.log('Close popup', args)
+    // console.log('Close popup', args)
         // if (args.Type == PopupType.Editor || args.Type == PopupType.QuickInfo)
         // {
         //     args.Data.Subject = (args.Data.Subject == "Add title") ? "New event" : args.Data.Subject;   //The default subject is changed from Add Title to New event
@@ -621,19 +583,9 @@ const Calendar = () => {
           currentView='TimelineMonth'
           //default date and interval
             
-          selectedDate={dayjs().format('YYYY-MM-DD')}
-          minDate={dayjs().subtract(1, 'day')}
-          //+1 month
-            maxDate={dayjs().add(2, 'month')}
-          // dateValue={"2023-09-20"}
-
-
-          //show only days between min and max visible
-            // showWeekend={true
-            // showWeekend={
-          // selectedDate = {new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDay())}
-          // maxDate = {new Date(new Date().getFullYear(), new Date().getMonth(), 27)}
-          // dateValue = {new Date(new Date().setDate(14))}
+          selectedDate={new Date(dayjs().format('YYYY-MM-DD'))}
+          // minDate={dayjs().subtract(1, 'day')}
+            maxDate={new Date(dayjs().add(4, 'month'))}
           ref={scheduleObj}
           actionBegin={onActionBegin}
             editorTemplate={editorTemplate}
@@ -642,18 +594,11 @@ const Calendar = () => {
             resourceHeaderTemplate={resourceHeaderTemplate}
             cellClick={onCellClick}
             renderCell={onRenderCell.bind(this)}
-            // quickInfoTemplates={{
-            //   // header: headerTemplate.bind(this),
-            //   // content: contentTemplate.bind(this),
-            //   // content: addNewGuestBooking.bind(this),
-            //   footer: footerTemplate.bind(this),
-            // }}
             loading={true}
           width='100%' 
           height='650px' 
           // colorField='#f8a398'
            group={{ enableCompactView: false, resources: ['MeetingRoom'] }}
-          //  eventSettings={{ template: editorTemplate }}
           eventSettings={{
             dataSource: bookingdata?.data?.map((item) => {
               const allGuests = guestsdata?.data?.filter((data) => {
@@ -662,7 +607,7 @@ const Calendar = () => {
               if(item.checkInTime===null){
                 return {
                   Id: item.id,
-                  Subject: allGuests ? `${allGuests[0]?.firstname} ${allGuests[0]?.lastname}` : null,
+                  Subject: allGuests ? `${allGuests[0]?.firstname.trim()} ${allGuests[0]?.lastname}` : null,
                   StartTime: item.bookStart,
                   EndTime: item.bookEnd,
                   RoomId: item.roomId,
@@ -672,7 +617,7 @@ const Calendar = () => {
               }else{
                 return {
                   Id: item.id,
-                  Subject: allGuests ? `${allGuests[0]?.firstname} ${allGuests[0]?.lastname}` : null,
+                  Subject: allGuests ? `${allGuests[0]?.firstname.trim()} ${allGuests[0]?.lastname}` : null,
                   StartTime: item.bookStart,
                   EndTime: item.bookEnd,
                   RoomId: item.roomId,
@@ -700,23 +645,13 @@ const Calendar = () => {
                             dataSource={roomsArr}
                             textField='roomName'
                             idField='roomId'
-                            // colorField='#f8a398'
-                            // colorField='color'
-                            // field='Name' 
-                            // title='Name' 
-                            // name='MeetingRoom' 
-                            // allowMultiple={true} 
-                            // dataSource={roomsdata?.data} 
-                            // textField='name' 
-                            // idField='id' 
-                            // colorField='color'
                             >
                             </ResourceDirective>
                         </ResourcesDirective>
                         <ViewsDirective>
                             <ViewDirective option='TimelineMonth'
-                                           interval={3}
-                                           selectedDate={dayjs()}
+                                           interval={4}
+                                           selectedDate={new Date(dayjs())}
                                               // showWeekend={true}
                             />
                         </ViewsDirective>

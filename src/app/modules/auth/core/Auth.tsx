@@ -13,6 +13,7 @@ import {AuthModel, UserModel} from './_models'
 import * as authHelper from './AuthHelpers'
 import {getUserByToken} from './_requests'
 import {WithChildren} from '../../../../_metronic/helpers'
+import jwtDecode from 'jwt-decode'
 
 type AuthContextProps = {
   auth: AuthModel | undefined
@@ -68,8 +69,10 @@ const AuthInit: FC<WithChildren> = ({children}) => {
   useEffect(() => {
     const requestUser = async (apiToken: string) => {
       try {
+        // console.log('auth.api_token: ',apiToken)
         if (!didRequest.current) {
-          const {data} = await getUserByToken(apiToken)
+          // const {data} = await getUserByToken(apiToken)
+          const data:any = jwtDecode(apiToken)
           if (data) {
             setCurrentUser(data)
           }
@@ -82,12 +85,12 @@ const AuthInit: FC<WithChildren> = ({children}) => {
       } finally {
         setShowSplashScreen(false)
       }
-
+      
       return () => (didRequest.current = true)
     }
-
-    if (auth && auth.api_token) {
-      requestUser(auth.api_token)
+    // console.log('auth: ',auth)
+    if (auth && auth.jwtToken) {
+      requestUser(auth.jwtToken)
     } else {
       logout()
       setShowSplashScreen(false)

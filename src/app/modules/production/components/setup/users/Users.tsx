@@ -11,6 +11,7 @@ import {
   addServiceApi,
   deleteServiceiceCategoryApi,
   deleteUserApi,
+  fetchRolesApi,
   fetchRooms,
   fetchServiceCategoryApi,
   fetchUsersApi,
@@ -28,6 +29,7 @@ const Users = () => {
   const [img, setImg] = useState()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const {data: usersData, isLoading: usersLoading} = useQuery('users', fetchUsersApi)
+  const {data: usersRoles, isLoading: usersRolesLoading} = useQuery('roles', fetchRolesApi)
   const {mutate: addCategoryData} = useMutation((values: any) => addServiceApi(values))
   const {mutate: deleteUserData} = useMutation((id: any) =>
     deleteUserApi(id)
@@ -56,6 +58,30 @@ const Users = () => {
       },
     })
   }
+
+  const roles = usersRoles?.data
+  const userAndRoles = usersData?.data.map((e: any) => {
+    // console.log('e', e)
+
+    const role = roles.find((x: any) => {
+      // console.log("x", x)
+
+      if (x.id === e.roleId) {
+        return x
+      }
+    })
+
+    // console.log('dat',role)
+    return {
+      lastName: e?.lastName,
+      firstName: e?.firstName,
+      username: e?.username,
+      email: e?.email,
+      role: role?.name,
+    }
+  })
+  // console.log(userAndRoles)
+
   const cancelNoteModal = () => {
     setopenNoteModal(false)
   }
@@ -110,26 +136,13 @@ const Users = () => {
       },
     },
     {
-      title: 'Surname',
-      dataIndex: 'surname',
+      title: 'LastName',
+      dataIndex: 'lastName',
       sorter: (a: any, b: any) => {
-        if (a.surname > b.surname) {
+        if (a.lastName > b.lastName) {
           return 1
         }
-        if (b.surname > a.surname) {
-          return -1
-        }
-        return 0
-      },
-    },
-    {
-      title: 'Gender',
-      dataIndex: 'gender',
-      sorter: (a: any, b: any) => {
-        if (a.gender > b.gender) {
-          return 1
-        }
-        if (b.gender > a.gender) {
+        if (b.lastName > a.lastName) {
           return -1
         }
         return 0
@@ -143,6 +156,19 @@ const Users = () => {
           return 1
         }
         if (b.username > a.username) {
+          return -1
+        }
+        return 0
+      },
+    },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      sorter: (a: any, b: any) => {
+        if (a.role > b.role) {
+          return 1
+        }
+        if (b.role > a.role) {
           return -1
         }
         return 0
@@ -168,11 +194,11 @@ const Users = () => {
       width: 20,
       render: (_: any, record: any) => (
         <Space size='middle'>
-          <Link to={`/services/details/${record.id}`}>
+          {/* <Link to={`/services/details/${record.id}`}>
             <a href='#' className='btn btn-light-primary btn-sm'>
               Edit
             </a>
-          </Link>
+          </Link> */}
           {/* <Link to={`/employee-edit-form/${record.id}`}> */}
           <a
             href='#'
@@ -244,7 +270,7 @@ const Users = () => {
           </div>
           <Table
             columns={columns}
-            dataSource={usersData?.data}
+            dataSource={userAndRoles}
             loading={usersLoading}
             className='table-responsive'
           />
