@@ -1,12 +1,30 @@
-import {Button, Form, Input, InputNumber, Modal, Space, Table, message,Typography, Row,Col} from 'antd'
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Space,
+  Table,
+  message,
+  Typography,
+  Row,
+  Col,
+} from 'antd'
 import {useEffect, useState} from 'react'
 import axios from 'axios'
 import {KTCardBody, KTSVG} from '../../../../../../_metronic/helpers'
 import {BASE_URL} from '../../../urls'
 import {Link, useParams} from 'react-router-dom'
 // import { employeedata } from '../../../../../data/DummyData'
-import {useQuery, useQueryClient,useMutation} from 'react-query'
-import {Api_Endpoint, addGuestBilling, fetchCurrencies, fetchGuestBilling, fetchRooms} from '../../../../../services/ApiCalls'
+import {useQuery, useQueryClient, useMutation} from 'react-query'
+import {
+  Api_Endpoint,
+  addGuestBilling,
+  fetchCurrencies,
+  fetchGuestBilling,
+  fetchRooms,
+} from '../../../../../services/ApiCalls'
 import Checkbox from 'antd/es/checkbox/Checkbox'
 
 const Billing = () => {
@@ -23,41 +41,43 @@ const Billing = () => {
   const [openCreditModal, setopenCreditModal] = useState(false)
   const {mutate: guestBilling} = useMutation((values: any) => addGuestBilling(values))
   const {data: currencydata, isLoading: currencyLoad} = useQuery('currency', fetchCurrencies)
-const { data: billingData, isLoading: billingLoad } = useQuery(
+  const {data: billingData, isLoading: billingLoad} = useQuery(
     'AllGuestBillings',
     () => fetchGuestBilling(parms['*']), // Pass the id as an argument
     {
-    //   enabled: yourIdHere !== undefined, // You can enable or disable the query based on whether id is defined
+      //   enabled: yourIdHere !== undefined, // You can enable or disable the query based on whether id is defined
     }
-  );
+  )
   const [paymentForm] = Form.useForm()
   const [debitForm] = Form.useForm()
   const [creditForm] = Form.useForm()
   const queryClient = useQueryClient()
-  const { Text } = Typography;
+  const {Text} = Typography
   const parms: any = useParams()
 
-  var totalDebit = 0;
-  var totalCredit = 0;
-  var totalBalance = 0;
+  var totalDebit = 0
+  var totalCredit = 0
+  var totalBalance = 0
   billingData?.data.map((e: any) => {
-    totalDebit = totalDebit + e.debit;
-    totalCredit = totalCredit + e.credit;
-});
-totalBalance = totalCredit - totalDebit
-  var totalConvertedDebit = 0;
-  var totalConvertedCredit = 0;
-  var totalConvertedBalance = 0;
-  var symbol;
+    totalDebit = totalDebit + e.debit
+    totalCredit = totalCredit + e.credit
+  })
+  totalBalance = totalCredit - totalDebit
+  var totalConvertedDebit = 0
+  var totalConvertedCredit = 0
+  var totalConvertedBalance = 0
+  var symbol
   currencydata?.data.map((e: any) => {
-    totalConvertedDebit = totalDebit * e.rate
+    if(e.isBase==true){
+      totalConvertedDebit = totalDebit * e.rate
     totalConvertedCredit = totalCredit * e.rate
     symbol = e.symbol
     totalConvertedBalance = totalBalance * e.rate
-    if(totalConvertedBalance<0){
-        totalConvertedBalance = totalConvertedBalance *(-1)
+    if (totalConvertedBalance < 0) {
+      totalConvertedBalance = totalConvertedBalance * -1
     }
-  });
+    }
+  })
   //   console.log(parms)
   //   console.log(roomsdata?.data?.filter((rooms: any)=>rooms.typeId===parms.id))
   //   console.log(roomsdata?.data?.filter((rooms: any)=>rooms?.typeId===1))
@@ -68,34 +88,34 @@ totalBalance = totalCredit - totalDebit
   const handleOk = () => {
     setIsModalOpen(false)
   }
-//   const handlePayment = () => {
-//     Modal.confirm({
-//       title: 'Are you sure, you want to make payment for the selected items?',
-//       okText: 'Pay',
-//       onOk: () => {
-//         serviceBillData.map((item: any) => {
-//           if (servicePaymentData.some((selectedItem: { serviceId: any }) => selectedItem.serviceId === item.id)) {
-//             // If the item is selected for payment, proceed with the payment
-//             const serviceId = parseInt(item.id);
-//             updatePayment(serviceId, {
-//               onSuccess: () => {
-//                 message.success('Payment made successfully!');
-//                 setopenGenerateModal(false)
-//                 queryClient.invalidateQueries('Bookings')
-//                 queryClient.invalidateQueries('fetchGuestServiceQuery')
-//                 queryClient.invalidateQueries('Guests')
-//                 queryClient.invalidateQueries('rooms')
-//                 queryClient.invalidateQueries('fetchServicesDetails')
-//               },
-//               onError(error, variables, context) {
-//                 message.destroy('Error occurred while submitting payment');
-//               },
-//             });
-//           }
-//         });
-//       },
-//     });
-//   };
+  //   const handlePayment = () => {
+  //     Modal.confirm({
+  //       title: 'Are you sure, you want to make payment for the selected items?',
+  //       okText: 'Pay',
+  //       onOk: () => {
+  //         serviceBillData.map((item: any) => {
+  //           if (servicePaymentData.some((selectedItem: { serviceId: any }) => selectedItem.serviceId === item.id)) {
+  //             // If the item is selected for payment, proceed with the payment
+  //             const serviceId = parseInt(item.id);
+  //             updatePayment(serviceId, {
+  //               onSuccess: () => {
+  //                 message.success('Payment made successfully!');
+  //                 setopenGenerateModal(false)
+  //                 queryClient.invalidateQueries('Bookings')
+  //                 queryClient.invalidateQueries('fetchGuestServiceQuery')
+  //                 queryClient.invalidateQueries('Guests')
+  //                 queryClient.invalidateQueries('rooms')
+  //                 queryClient.invalidateQueries('fetchServicesDetails')
+  //               },
+  //               onError(error, variables, context) {
+  //                 message.destroy('Error occurred while submitting payment');
+  //               },
+  //             });
+  //           }
+  //         });
+  //       },
+  //     });
+  //   };
 
   const handleCancel = () => {
     form.resetFields()
@@ -103,75 +123,75 @@ totalBalance = totalCredit - totalDebit
   }
   // const {data: allRooms} = useQuery('roomsTypes', fetchRooms, {cacheTime: 5000})
   const deleteData = async (element: any) => {
-      Modal.confirm({
+    Modal.confirm({
       okText: 'Yes',
       okType: 'primary',
       title: 'Are you sure, you want to delete this transaction',
       onOk: async () => {
-          const response = await axios.delete(`${BASE_URL}/Billing/id?id=`+element)
-      // update the local state so that react can refecth and re-render the table with the new data
-      // const newData = gridData.filter((item: any) => item.id !== element.id)
-      // setGridData(newData)
-      if (response.status==200) {
-        message.success("Transaction deleted successfully")
-        queryClient.invalidateQueries('AllGuestBillings')
-      }else{
-        message.success("Transaction deletion failed")
-      }
-      return response.status
+        const response = await axios.delete(`${BASE_URL}/Billing/id?id=` + element)
+        // update the local state so that react can refecth and re-render the table with the new data
+        // const newData = gridData.filter((item: any) => item.id !== element.id)
+        // setGridData(newData)
+        if (response.status == 200) {
+          message.success('Transaction deleted successfully')
+          queryClient.invalidateQueries('AllGuestBillings')
+        } else {
+          message.success('Transaction deletion failed')
+        }
+        return response.status
       },
     })
   }
-  const newPayment = (value:any) => {
+  const newPayment = (value: any) => {
     // console.log("Hello")
-    value.customerId= parms['*']
+    value.customerId = parms['*']
     console.log(value)
 
     guestBilling(value, {
-        onSuccess: () => {
-          message.success('Transaction made successfully!');
-          setopenPaymentModal(false)
-          paymentForm.resetFields()
-          queryClient.invalidateQueries('AllGuestBillings')
-        },
-        onError(error, variables, context) {
-          message.destroy('Error occurred while submitting payment');
-        },
-      });
+      onSuccess: () => {
+        message.success('Transaction made successfully!')
+        setopenPaymentModal(false)
+        paymentForm.resetFields()
+        queryClient.invalidateQueries('AllGuestBillings')
+      },
+      onError(error, variables, context) {
+        message.destroy('Error occurred while submitting payment')
+      },
+    })
   }
-  const newDebit = (value:any) => {
+  const newDebit = (value: any) => {
     // console.log("Hello")
-    value.customerId= parms['*']
+    value.customerId = parms['*']
     console.log(value)
 
     guestBilling(value, {
-        onSuccess: () => {
-          message.success('Transaction made successfully!');
-          setopenDebitModal(false)
-          debitForm.resetFields()
-          queryClient.invalidateQueries('AllGuestBillings')
-        },
-        onError(error, variables, context) {
-          message.destroy('Error occurred while submitting payment');
-        },
-      });
+      onSuccess: () => {
+        message.success('Transaction made successfully!')
+        setopenDebitModal(false)
+        debitForm.resetFields()
+        queryClient.invalidateQueries('AllGuestBillings')
+      },
+      onError(error, variables, context) {
+        message.destroy('Error occurred while submitting payment')
+      },
+    })
   }
-  const newCredit = (value:any) => {
+  const newCredit = (value: any) => {
     // console.log("Hello")
-    value.customerId= parms['*']
+    value.customerId = parms['*']
     console.log(value)
 
     guestBilling(value, {
-        onSuccess: () => {
-          message.success('Transaction made successfully!');
-          setopenCreditModal(false)
-          creditForm.resetFields()
-          queryClient.invalidateQueries('AllGuestBillings')
-        },
-        onError(error, variables, context) {
-          message.destroy('Error occurred while submitting payment');
-        },
-      });
+      onSuccess: () => {
+        message.success('Transaction made successfully!')
+        setopenCreditModal(false)
+        creditForm.resetFields()
+        queryClient.invalidateQueries('AllGuestBillings')
+      },
+      onError(error, variables, context) {
+        message.destroy('Error occurred while submitting payment')
+      },
+    })
   }
 
   // const deleteRoomType = (id: any) => {
@@ -213,7 +233,7 @@ totalBalance = totalCredit - totalDebit
     {
       title: 'RoomId',
       dataIndex: 'roomId',
-    //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
+      //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
       sorter: (a: any, b: any) => {
         if (a.roomId > b.roomId) {
           return 1
@@ -227,7 +247,7 @@ totalBalance = totalCredit - totalDebit
     {
       title: 'Description',
       dataIndex: 'description',
-    //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
+      //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
       sorter: (a: any, b: any) => {
         if (a.description > b.description) {
           return 1
@@ -241,7 +261,7 @@ totalBalance = totalCredit - totalDebit
     {
       title: 'Debit',
       dataIndex: 'debit',
-    //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
+      //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
       sorter: (a: any, b: any) => {
         if (a.debit > b.debit) {
           return 1
@@ -255,7 +275,7 @@ totalBalance = totalCredit - totalDebit
     {
       title: 'Credit',
       dataIndex: 'credit',
-    //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
+      //   render: (isActive: boolean) => <Checkbox checked={isActive} />,
       sorter: (a: any, b: any) => {
         if (a.credit > b.credit) {
           return 1
@@ -278,13 +298,13 @@ totalBalance = totalCredit - totalDebit
           </Link> */}
           {/* <Link to={`/rooms/${parms.id}`} state={record.id}> */}
           <Link to='#'>
-          <a
-            href='#'
-            className='btn btn-light-danger btn-sm'
-            onClick={() => deleteData(record.id)}
-          >
-            Delete
-          </a>
+            <a
+              href='#'
+              className='btn btn-light-danger btn-sm'
+              onClick={() => deleteData(record.id)}
+            >
+              Delete
+            </a>
             {/* <span
               className='btn btn-light-info btn-sm delete-button'
               style={{backgroundColor: 'red', color: 'white'}}
@@ -298,21 +318,21 @@ totalBalance = totalCredit - totalDebit
   ]
   // const {data: allRoomss} = useQuery('roomsTypes', fetchRooms, {cacheTime: 5000})
 
-//   const loadData = async () => {
-//     setLoading(true)
-//     try {
-//       const response = await axios.get(`${Api_Endpoint}/RoomsType`)
-//       setGridData(response.data)
-//       setLoading(false)
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   }
+  //   const loadData = async () => {
+  //     setLoading(true)
+  //     try {
+  //       const response = await axios.get(`${Api_Endpoint}/RoomsType`)
+  //       setGridData(response.data)
+  //       setLoading(false)
+  //     } catch (error) {
+  //       console.log(error)
+  //     }
+  //   }
 
-//   useEffect(() => {
-//     loadData()
-//     // fetchImage()
-//   }, [])
+  //   useEffect(() => {
+  //     loadData()
+  //     // fetchImage()
+  //   }, [])
 
   // const sortedEmployees = gridData.sort((a:any, b:any) => a?.departmentId.localeCompare(b?.departmentId));
   // const females = sortedEmployees.filter((employee:any) => employee.gender === 'female');
@@ -332,12 +352,12 @@ totalBalance = totalCredit - totalDebit
     key: index,
   }))
 
-//   const handleInputChange = (e: any) => {
-//     setSearchText(e.target.value)
-//     if (e.target.value === '') {
-//       loadData()
-//     }
-//   }
+  //   const handleInputChange = (e: any) => {
+  //     setSearchText(e.target.value)
+  //     if (e.target.value === '') {
+  //       loadData()
+  //     }
+  //   }
 
   const globalSearch = () => {
     // @ts-ignore
@@ -386,7 +406,7 @@ totalBalance = totalCredit - totalDebit
     >
       <KTCardBody className='py-4 '>
         <div className='table-responsive'>
-        {/* <Link to='/roomType'>
+          {/* <Link to='/roomType'>
                 <a
                   style={{fontSize: '16px', fontWeight: '500'}}
                   className='mb-7 btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary'
@@ -395,7 +415,6 @@ totalBalance = totalCredit - totalDebit
                 </a>
               </Link> */}
           <div className='d-flex justify-content-between'>
-            
             {/* <Space style={{marginBottom: 16}}>
               
               {/* <Input
@@ -431,205 +450,300 @@ totalBalance = totalCredit - totalDebit
             className='table-responsive'
           />
         </div>
-        <div style={{justifyContent: 'end',paddingInline:"20%"}}>
-        <Row gutter={24} style={{justifyContent:"flex-end"}}>
-  <Col span={12}>
-   Col 1
-  </Col>
-  <Col span={12}>
-     Col 2
-  </Col>
-</Row>
-<Row gutter={24} style={{justifyContent:"flex-end"}}>
-  <Col span={12}>
-    Col 1
-  </Col>
-  <Col span={12}>
-     Col 2
-  </Col>
-</Row>
+        <div style={{ width:'100%'}}>
+          {/* //Row 1 */}
+          <Row gutter={24 } >
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text>${totalDebit}</Text>
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text>${totalCredit}</Text>
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col> 
+          </Row>
+          {/* //Row 2 */}
+          <Row gutter={24 } >
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text>{symbol}{totalConvertedDebit}</Text>
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text>{symbol}{totalConvertedCredit}</Text>
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col> 
+          </Row>
+          
+          {/* //Row 3 */}
+          <Row gutter={24 } >
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text style={{fontWeight:"bold"}}>Balance</Text>
+            </Col>
+            <Col span={4} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
+              <Text style={{fontWeight:"bold"}}>{symbol}{totalConvertedBalance}</Text>
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalDebit}</Text> */}
+            </Col>
+            <Col span={2} style={{background:"none"}}>
+              {/* <Text>{totalCredit}</Text> */}
+            </Col> 
+          </Row>
+
+          {/* <Row gutter={24}>
+            <Col span={12}>{symbol}{totalConvertedDebit}</Col>
+            <Col span={12}>{symbol}{totalConvertedCredit}</Col>
+          </Row> */}
         </div>
         <Space style={{marginBottom: 16}}>
-        {/* <Link to={'#'} > */}
-                <button type='button' className='btn btn-primary me-3'onClick={addPayment}>
-                  <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
-                  Payment
-                </button>
-              {/* </Link> */}
-            </Space>
-        <Space style={{marginBottom: 16,}}>
-        <Link to={`#`}>
-                <button type='button' className='btn btn-primary me-3'onClick={addDebit}>
-                  <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
-                  Debit Note
-                </button>
-              </Link>
-            </Space>
+          {/* <Link to={'#'} > */}
+          <button type='button' className='btn btn-primary me-3' onClick={addPayment}>
+            <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
+            Payment
+          </button>
+          {/* </Link> */}
+        </Space>
         <Space style={{marginBottom: 16}}>
-        <Link to={`#`}>
-                <button type='button' className='btn btn-primary me-3'onClick={addCredit}>
-                  <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
-                  Credit Note
-                </button>
-              </Link>
-            </Space>
+          <Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3' onClick={addDebit}>
+              <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
+              Debit Note
+            </button>
+          </Link>
+        </Space>
         <Space style={{marginBottom: 16}}>
-        <Link to={`#`}>
-                <button type='button' className='btn btn-primary me-3'>
-                  {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
-                  Close
-                </button>
-              </Link>
-            </Space>
+          <Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3' onClick={addCredit}>
+              <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
+              Credit Note
+            </button>
+          </Link>
+        </Space>
+        <Space style={{marginBottom: 16}}>
+          <Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3'>
+              {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
+              Close
+            </button>
+          </Link>
+        </Space>
         <Modal
-            open={openPaymentModal}
-            okText='Confirm'
-            title='Add Payment'
-            closable={true}
-            onCancel={cancelBillModal}
-            // onOk={handleOk}
-            footer={null}
-          >
-            <Form form={paymentForm} onFinish={newPayment}>
-              <Form.Item
-                name={'credit'}
-                label='Payment'
-                rules={[{required: true, message: 'Please enter amount'}]}
-                hasFeedback
+          open={openPaymentModal}
+          okText='Confirm'
+          title='Add Payment'
+          closable={true}
+          onCancel={cancelBillModal}
+          // onOk={handleOk}
+          footer={null}
+        >
+          <Form form={paymentForm} onFinish={newPayment}>
+            <Form.Item
+              name={'credit'}
+              label='Payment'
+              rules={[{required: true, message: 'Please enter amount'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='number'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='number'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <Form.Item
-                name={'description'}
-                label='Description'
-                rules={[{required: true, message: 'Please enter description'}]}
-                hasFeedback
+              />
+            </Form.Item>
+            <Form.Item
+              name={'description'}
+              label='Description'
+              rules={[{required: true, message: 'Please enter description'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='text'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='text'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <div style={{display: 'flex', justifyContent: 'end'}}>
-              <Button key="cancel" onClick={cancelBillModal}>
-            Cancel
-          </Button>
-          <Button key="confirm" type="primary" htmlType="submit">
-            Confirm
-          </Button>
-              </div>
-            </Form>
+              />
+            </Form.Item>
+            <div style={{display: 'flex', justifyContent: 'end'}}>
+              <Button key='cancel' onClick={cancelBillModal} className='me-3'>
+                Cancel
+              </Button>
+              <Button key='confirm' type='primary' htmlType='submit'>
+                Confirm
+              </Button>
+            </div>
+          </Form>
         </Modal>
         <Modal
-            open={openDebitModal}
-            okText='Confirm'
-            title='Add Debit Note'
-            closable={true}
-            onCancel={cancelBillModal}
-            // onOk={handleOk}
-            footer={null}
-          >
-            <Form form={debitForm} onFinish={newDebit}>
-              <Form.Item
-                name={'debit'}
-                label='Payment'
-                rules={[{required: true, message: 'Please enter amount'}]}
-                hasFeedback
+          open={openDebitModal}
+          okText='Confirm'
+          title='Add Debit Note'
+          closable={true}
+          onCancel={cancelBillModal}
+          // onOk={handleOk}
+          footer={null}
+        >
+          <Form form={debitForm} onFinish={newDebit}>
+            <Form.Item
+              name={'debit'}
+              label='Payment'
+              rules={[{required: true, message: 'Please enter amount'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='number'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='number'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <Form.Item
-                name={'description'}
-                label='Description'
-                rules={[{required: true, message: 'Please enter description'}]}
-                hasFeedback
+              />
+            </Form.Item>
+            <Form.Item
+              name={'description'}
+              label='Description'
+              rules={[{required: true, message: 'Please enter description'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='text'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='text'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <div style={{display: 'flex', justifyContent: 'end'}}>
-              <Button key="cancel" onClick={cancelBillModal}>
-            Cancel
-          </Button>
-          <Button key="confirm" type="primary" htmlType="submit">
-            Confirm
-          </Button>
-              </div>
-            </Form>
+              />
+            </Form.Item>
+            <div style={{display: 'flex', justifyContent: 'end'}}>
+              <Button key='cancel' onClick={cancelBillModal} className='me-3'>
+                Cancel
+              </Button>
+              <Button key='confirm' type='primary' htmlType='submit'>
+                Confirm
+              </Button>
+            </div>
+          </Form>
         </Modal>
         <Modal
-            open={openCreditModal}
-            okText='Confirm'
-            title='Add Credit Note'
-            closable={true}
-            onCancel={cancelBillModal}
-            // onOk={handleOk}
-            footer={null}
-          >
-            <Form form={creditForm} onFinish={newCredit}>
-              <Form.Item
-                name={'credit'}
-                label='Payment'
-                rules={[{required: true, message: 'Please enter amount'}]}
-                hasFeedback
+          open={openCreditModal}
+          okText='Confirm'
+          title='Add Credit Note'
+          closable={true}
+          onCancel={cancelBillModal}
+          // onOk={handleOk}
+          footer={null}
+        >
+          <Form form={creditForm} onFinish={newCredit}>
+            <Form.Item
+              name={'credit'}
+              label='Payment'
+              rules={[{required: true, message: 'Please enter amount'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='number'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='number'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <Form.Item
-                name={'description'}
-                label='Description'
-                rules={[{required: true, message: 'Please enter description'}]}
-                hasFeedback
+              />
+            </Form.Item>
+            <Form.Item
+              name={'description'}
+              label='Description'
+              rules={[{required: true, message: 'Please enter description'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='text'
                 style={{width: '100%'}}
-                labelCol={{span: 5}}
-              >
-                <Input
-                  type='text'
-                  style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
-                />
-              </Form.Item>
-              <div style={{display: 'flex', justifyContent: 'end'}}>
-              <Button key="cancel" onClick={cancelBillModal}>
-            Cancel
-          </Button>
-          <Button key="confirm" type="primary" htmlType="submit">
-            Confirm
-          </Button>
-              </div>
-            </Form>
+              />
+            </Form.Item>
+            <div style={{display: 'flex', justifyContent: 'end'}}>
+              <Button key='cancel' onClick={cancelBillModal} className='me-3'>
+                Cancel
+              </Button>
+              <Button key='confirm' type='primary' htmlType='submit'>
+                Confirm
+              </Button>
+            </div>
+          </Form>
         </Modal>
       </KTCardBody>
     </div>

@@ -68,6 +68,7 @@ const CheckIn = () => {
   const {mutate: checkGuestOutQuery} = useMutation((values: any) => GuestCheckoutApi(values))
   // const {mutate: checkGuestInQuery} = useMutation((values: any) => GuestCheckinApi(values))
   const [openAddServiceModal, setopenAddServiceModal] = useState(false)
+  const [openTransferModal, setopenTransferModal] = useState(false)
   const [openGenerateModal, setopenGenerateModal] = useState(false)
   const {mutate: addGuestService} = useMutation((values: any) => addGuestServiceApi(values))
   const {data: fetchGuestServiceData, isLoading: fetchGuestServiceLoading} = useQuery(
@@ -98,6 +99,8 @@ const CheckIn = () => {
     servicesOptions.push({value: item.id, label: item.name})
   })
   const [serviceForm] = Form.useForm()
+  const [transferForm] = Form.useForm()
+  const [isUnAvailable,setCheckUnAvailability] = useState(true)
   const convertFromCedis = (e: any) => {
     let amount = 0
     currencyConverterApi('GHS', 'USD').then((res) =>
@@ -185,6 +188,14 @@ const CheckIn = () => {
 
   const cancelBillModal = () => {
     setopenGenerateModal(false)
+  }
+  const cancelTransferModal = () => {
+    setopenTransferModal(false)
+    setCheckUnAvailability(true)
+    transferForm.resetFields()
+  }
+  const displayTransferModal = () => {
+    setopenTransferModal(true)
   }
   // const handlePayment = () => {
   //   Modal.confirm({
@@ -416,7 +427,7 @@ const CheckIn = () => {
           <a href='#' className='btn btn-light-success btn-sm' onClick={() => addService(record)}>
             Services
           </a>
-          <a href='#' className='btn btn-light-dark btn-sm' onClick={() => ''}>
+          <a href='#' className='btn btn-light-dark btn-sm' onClick={() => displayTransferModal()}>
           {/* <a href='#' className='btn btn-light-dark btn-sm' onClick={() => generateBill(record)}> */}
             Transfer
             {/* {spinner?"Generate Bill":<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin rev={undefined} />} />} */}
@@ -767,12 +778,35 @@ const CheckIn = () => {
     serviceData.roomId = guestroomId
     serviceData.guestId = guestId
     setAllServiceData((prevAllServicesArr: any) => [...prevAllServicesArr, serviceData])
+
     arr.push(serviceData)
     // setAllServiceData(allServicesArr)
     setpriceValue(false)
     setTotalPrice(0)
 
     serviceForm.resetFields()
+  }
+  const newTransfer = (value:any) => {
+    console.log("Hello")
+    console.log(value)
+    setCheckUnAvailability(false)
+    
+    // serviceData.totalPrice = 0
+    // serviceData.isPaid = 0
+    // serviceData.bookingId = bookingId
+    // serviceData.unitPrice = priceValue
+    // serviceData.roomId = guestroomId
+    // serviceData.guestId = guestId
+    // setAllServiceData((prevAllServicesArr: any) => [...prevAllServicesArr, serviceData])
+    // arr.push(serviceData)
+    // // setAllServiceData(allServicesArr)
+    // setpriceValue(false)
+    // setTotalPrice(0)
+
+    // transferForm.resetFields()
+  }
+  const checkAvailability = () => {
+    console.log("Check Availability")
   }
 
   const addCheckIn = () => {
@@ -1239,6 +1273,58 @@ const CheckIn = () => {
               Total Bill: {totalGuestBill}
             </span>
           </Modal>
+
+          <Modal
+          open={openTransferModal}
+          okText='Confirm'
+          title='Select new Room'
+          closable={true}
+          // onCancel={cancelTransferModal}
+          // onOk={handleOk}
+          footer={null}
+        >
+          <Form form={transferForm} onFinish={newTransfer}>
+          
+            <Form.Item
+              name={'credit'}
+              label='Room'
+              rules={[{required: true, message: 'Please select a room'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <DropDownListComponent
+                id='room'
+                placeholder='Room'
+                data-name='room'
+                className='e-field'
+                dataSource={roomsdata?.data}
+                fields={{text: 'name', value: 'id'}}
+                // value={props && props.gameTypeId ? props.gameTypeId : null}
+                style={{width: '100%'}}
+              />
+              {/* <Input
+                type='number'
+                style={{width: '100%'}}
+                //   disabled={!priceValue}
+                //   onChange={onChangeForPrice}
+              /> */}
+            </Form.Item>
+            <div style={{display: 'flex', justifyContent: 'end'}}>
+              <Button key='cancel' onClick={cancelTransferModal} className='me-3'>
+                Cancel
+              </Button>
+              <Button key='confirm' type='primary' htmlType='submit' className='me-3'>
+                Check Availability
+              </Button>
+              <Button key='confirm' className='btn btn-danger text-center' disabled={isUnAvailable} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                Confirm
+              </Button>
+
+
+            </div>
+          </Form>
+        </Modal>
         </div>
       </KTCardBody>
     </div>
