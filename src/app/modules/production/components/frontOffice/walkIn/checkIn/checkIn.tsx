@@ -12,6 +12,7 @@ import {
   Table,
   Tabs,
   message,
+  DatePicker,
 } from 'antd'
 import {LoadingOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
@@ -21,7 +22,7 @@ import {BASE_URL} from '../../../../urls'
 import {Link} from 'react-router-dom'
 import {employeedata} from '../../../../../../data/DummyData'
 import {useMutation, useQuery, useQueryClient} from 'react-query'
-
+import moment from 'moment';
 import GuestCheckinApi, {
   Api_Endpoint,
   fetchGuests,
@@ -38,7 +39,8 @@ import GuestCheckinApi, {
 import {DropDownListComponent} from '@syncfusion/ej2-react-dropdowns/src/drop-down-list/dropdownlist.component'
 import TextArea from 'antd/es/input/TextArea'
 import {useForm} from 'react-hook-form'
-import { Console } from 'console'
+import {Console} from 'console'
+import {DateTimePickerComponent} from '@syncfusion/ej2-react-calendars'
 
 // import { Api_Endpoint, fetchDepartments, fetchEmployees, fetchGrades, fetchNotches, fetchPaygroups } from '../../../../../../services/ApiCalls'
 
@@ -100,7 +102,7 @@ const CheckIn = () => {
   })
   const [serviceForm] = Form.useForm()
   const [transferForm] = Form.useForm()
-  const [isUnAvailable,setCheckUnAvailability] = useState(true)
+  const [isUnAvailable, setCheckUnAvailability] = useState(true)
   const convertFromCedis = (e: any) => {
     let amount = 0
     currencyConverterApi('GHS', 'USD').then((res) =>
@@ -126,6 +128,8 @@ const CheckIn = () => {
 
   const guestsData = getGuests?.data
   // console.log('room', roomTypeData)
+  // console.log('bookingData?.data: ', bookingData?.data)
+  // let formattedDate :any
   const data = bookingData?.data.map((e: any) => {
     const guest = guestsData?.find((x: any) => {
       // console.log("x", x)
@@ -146,6 +150,8 @@ const CheckIn = () => {
     var checkinTimeData = new Date(e?.checkInTime)
 
     var bookStartTime = new Date(e?.bookStart)
+    var bookEndTime = new Date(e?.bookEnd)
+    // formattedDate = moment(bookEndTime).format('YYYY-MM-DD HH:mm:ss');
     return {
       id: e?.id,
       guest: `${guest?.firstname?.trim()} ${guest?.lastname}`,
@@ -160,6 +166,21 @@ const CheckIn = () => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
+      }),
+      bookEnd: bookEndTime.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        // year: 'numeric',
+        // month: '2-digit',
+        // day: '2-digit',
+        // hour: '2-digit',
+        // minute: '2-digit',
+        // second: '2-digit',
       }),
       checkInTime: e?.checkInTime
         ? checkinTimeData.toLocaleString('en-US', {
@@ -177,10 +198,10 @@ const CheckIn = () => {
   })
   // console.log('data: '+data)
   const newFilteredData = data?.filter((e: any) => {
-    // console.log('newFilteredData: '+e)
+    // console.log('newFilteredData data: '+e)
     return e.checkOutTime == null && e.checkInTime != null
   })
-  
+
   const newReservationData = data?.filter((e: any) => {
     // console.log('newFilteredData: '+e)
     return e.checkOutTime == null && e.checkInTime == null
@@ -194,7 +215,14 @@ const CheckIn = () => {
     setCheckUnAvailability(true)
     transferForm.resetFields()
   }
-  const displayTransferModal = () => {
+  var selectedItemBookEnd
+  const displayTransferModal = (value: any) => {
+    tableValue = value
+    // console.log(tableValue)
+    // console.log('tableValue: ', tableValue['bookStart'])
+    // console.log('tableValue: ', tableValue['bookEnd'])
+    selectedItemBookEnd = tableValue['bookEnd']
+    // console.log('selectedItemBookEnd: ', selectedItemBookEnd)
     setopenTransferModal(true)
   }
   // const handlePayment = () => {
@@ -204,7 +232,7 @@ const CheckIn = () => {
   //     onOk: () => {
   //       serviceBillData.map((item: any) => {
   //         console.log("item.id: "+item.id)
-  //         var serviceId=parseInt(item.id )  
+  //         var serviceId=parseInt(item.id )
   //          updatePayment(serviceId, {
   //           onSuccess: () => {
   //             message.success('Payment made successfully!')
@@ -223,12 +251,16 @@ const CheckIn = () => {
       okText: 'Pay',
       onOk: () => {
         serviceBillData.map((item: any) => {
-          if (servicePaymentData.some((selectedItem: { serviceId: any }) => selectedItem.serviceId === item.id)) {
+          if (
+            servicePaymentData.some(
+              (selectedItem: {serviceId: any}) => selectedItem.serviceId === item.id
+            )
+          ) {
             // If the item is selected for payment, proceed with the payment
-            const serviceId = parseInt(item.id);
+            const serviceId = parseInt(item.id)
             updatePayment(serviceId, {
               onSuccess: () => {
-                message.success('Payment made successfully!');
+                message.success('Payment made successfully!')
                 setopenGenerateModal(false)
                 queryClient.invalidateQueries('Bookings')
                 queryClient.invalidateQueries('fetchGuestServiceQuery')
@@ -237,15 +269,15 @@ const CheckIn = () => {
                 queryClient.invalidateQueries('fetchServicesDetails')
               },
               onError(error, variables, context) {
-                message.destroy('Error occurred while submitting payment');
+                message.destroy('Error occurred while submitting payment')
               },
-            });
+            })
           }
-        });
+        })
       },
-    });
-  };
-  
+    })
+  }
+
   const handleOk = () => {
     Modal.confirm({
       okText: 'Add',
@@ -258,7 +290,7 @@ const CheckIn = () => {
 
           addGuestService(item, {
             onSuccess: () => {
-              message.success('Service added successfully!');
+              message.success('Service added successfully!')
               setopenAddServiceModal(false)
               queryClient.invalidateQueries('Bookings')
               queryClient.invalidateQueries('fetchGuestServiceQuery')
@@ -307,6 +339,7 @@ const CheckIn = () => {
   //   }
   // }
 
+  var tableValue: any
   const serviceColumns: any = [
     {
       title: 'Service',
@@ -395,10 +428,24 @@ const CheckIn = () => {
       title: 'Start',
       dataIndex: 'bookStart',
       sorter: (a: any, b: any) => {
-        if (a.checkInTime > b.checkInTime) {
+        if (a.bookStart > b.bookStart) {
           return 1
         }
-        if (b.checkInTime > a.checkInTime) {
+        if (b.bookStart > a.bookStart) {
+          return -1
+        }
+        return 0
+      },
+    },
+    
+    {
+      title: 'End',
+      dataIndex: 'bookEnd',
+      sorter: (a: any, b: any) => {
+        if (a.bookEnd > b.bookEnd) {
+          return 1
+        }
+        if (b.bookEnd > a.bookEnd) {
           return -1
         }
         return 0
@@ -427,14 +474,18 @@ const CheckIn = () => {
           <a href='#' className='btn btn-light-success btn-sm' onClick={() => addService(record)}>
             Services
           </a>
-          <a href='#' className='btn btn-light-dark btn-sm' onClick={() => displayTransferModal()}>
-          {/* <a href='#' className='btn btn-light-dark btn-sm' onClick={() => generateBill(record)}> */}
+          <a
+            href='#'
+            className='btn btn-light-dark btn-sm'
+            onClick={() => displayTransferModal(record)}
+          >
+            {/* <a href='#' className='btn btn-light-dark btn-sm' onClick={() => generateBill(record)}> */}
             Transfer
             {/* {spinner?"Generate Bill":<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin rev={undefined} />} />} */}
           </a>
           <Link to={`/Billing/${record.guestId}`} className='btn btn-light-primary btn-sm'>
-          Check Out
-        </Link>
+            Check Out
+          </Link>
           {/* <a
             href='#'
             className='btn btn-light-primary btn-sm'
@@ -460,7 +511,7 @@ const CheckIn = () => {
       ),
     },
   ]
-  
+
   const reservationColumn: any = [
     {
       title: 'Name',
@@ -492,10 +543,10 @@ const CheckIn = () => {
       title: 'Start',
       dataIndex: 'bookStart',
       sorter: (a: any, b: any) => {
-        if (a.checkInTime > b.checkInTime) {
+        if (a.bookStart > b.bookStart) {
           return 1
         }
-        if (b.checkInTime > a.checkInTime) {
+        if (b.bookStart > a.bookStart) {
           return -1
         }
         return 0
@@ -586,7 +637,7 @@ const CheckIn = () => {
     //   message.info('Please, check In before you check out!')
     //   return
     // }
-    console.log('guestData: ',guestData)
+    console.log('guestData: ', guestData)
 
     Modal.confirm({
       okText: 'Confirm',
@@ -635,14 +686,13 @@ const CheckIn = () => {
     setServiceBillData([])
     setTotalBill(0)
     let guestServices = fetchGuestServiceData?.data.filter((item: any) => {
-      return item.bookingId == record.id && item.isPaid == false;
+      return item.bookingId == record.id && item.isPaid == false
     })
     getPaidServiceData([])
     let guestPaidServices = fetchGuestServiceData?.data.filter((item: any) => {
-      return item.bookingId == record.id && item.isPaid == true;
+      return item.bookingId == record.id && item.isPaid == true
     })
     // console.log("guestPaidServices " +guestPaidServices);
-
 
     guestServices?.forEach((item: any) => {
       totalBill += item.unitPrice
@@ -674,7 +724,7 @@ const CheckIn = () => {
   //   })
   //   guestServices?.forEach((item: any) => {
   //     totalBill += item.unitPrice
-      
+
   //     setTotalBill(totalBill)
   //     setServiceBillData((prevServiceBillData: any) => [...prevServiceBillData, item])
   //   })
@@ -702,6 +752,7 @@ const CheckIn = () => {
 
   useEffect(() => {
     loadData()
+    // console.log('newFilteredData: ',newFilteredData)
     setNewSearchedData(newFilteredData)
     // fetchImage()
   }, [])
@@ -740,7 +791,7 @@ const CheckIn = () => {
     globalSearch(e.target.value)
     if (e.target.value === '') {
       loadData()
-    }/*else{
+    } /*else{
       newFilteredData.filter(
         (item: { room: string })=> item.room?.toLowerCase().includes(e.target.value?.toLowerCase())
       );
@@ -786,11 +837,13 @@ const CheckIn = () => {
 
     serviceForm.resetFields()
   }
-  const newTransfer = (value:any) => {
-    console.log("Hello")
-    console.log(value)
+  const newTransfer = (value: any) => {
+    // console.log('Hello')
+    // console.log(value)
+    // console.log('///')
+    // console.log(tableValue)
     setCheckUnAvailability(false)
-    
+
     // serviceData.totalPrice = 0
     // serviceData.isPaid = 0
     // serviceData.bookingId = bookingId
@@ -806,7 +859,7 @@ const CheckIn = () => {
     // transferForm.resetFields()
   }
   const checkAvailability = () => {
-    console.log("Check Availability")
+    console.log('Check Availability')
   }
 
   const addCheckIn = () => {
@@ -818,11 +871,11 @@ const CheckIn = () => {
     // @ts-ignore
     filteredData = newFilteredData.filter((Filteredvalue) => {
       return (
-        Filteredvalue.guest?.toLowerCase().includes(searchedValue?.toLowerCase())||
-        Filteredvalue.room?.toLowerCase().includes(searchedValue?.toLowerCase()) 
-        )
-      })
-      // console.log('Filtered Data: '+filteredData)
+        Filteredvalue.guest?.toLowerCase().includes(searchedValue?.toLowerCase()) ||
+        Filteredvalue.room?.toLowerCase().includes(searchedValue?.toLowerCase())
+      )
+    })
+    // console.log('Filtered Data: '+filteredData)
     // setGridData(filteredData)
     setNewSearchedData(filteredData)
   }
@@ -1029,7 +1082,11 @@ const CheckIn = () => {
             title='New checkin'
             width={'50%'}
           >
-            <Table columns={reservationColumn} dataSource={newReservationData} loading={BookingsLoad} />
+            <Table
+              columns={reservationColumn}
+              dataSource={newReservationData}
+              loading={BookingsLoad}
+            />
             {/* <Form
               name='basic'
               labelCol={{span: 8}}
@@ -1088,7 +1145,7 @@ const CheckIn = () => {
             </Form>
            */}
           </Modal>
-          
+
           {/* <Modal
             open={isOpen}
             onCancel={closeModal}
@@ -1275,56 +1332,77 @@ const CheckIn = () => {
           </Modal>
 
           <Modal
-          open={openTransferModal}
-          okText='Confirm'
-          title='Select new Room'
-          closable={true}
-          // onCancel={cancelTransferModal}
-          // onOk={handleOk}
-          footer={null}
-        >
-          <Form form={transferForm} onFinish={newTransfer}>
-          
-            <Form.Item
-              name={'credit'}
-              label='Room'
-              rules={[{required: true, message: 'Please select a room'}]}
-              hasFeedback
-              style={{width: '100%'}}
-              labelCol={{span: 5}}
-            >
-              <DropDownListComponent
-                id='room'
-                placeholder='Room'
-                data-name='room'
-                className='e-field'
-                dataSource={roomsdata?.data}
-                fields={{text: 'name', value: 'id'}}
-                // value={props && props.gameTypeId ? props.gameTypeId : null}
+            open={openTransferModal}
+            okText='Confirm'
+            title='Select new Room'
+            closable={true}
+            // onCancel={cancelTransferModal}
+            // onOk={handleOk}
+            footer={null}
+          >
+            <Form form={transferForm} onFinish={newTransfer}>
+              <Form.Item
+                name={'roomId'}
+                label='Room'
+                rules={[{required: true, message: 'Please select a room'}]}
+                hasFeedback
                 style={{width: '100%'}}
-              />
-              {/* <Input
+                labelCol={{span: 5}}
+              >
+                <DropDownListComponent
+                  id='room'
+                  placeholder='Room'
+                  data-name='room'
+                  className='e-field'
+                  dataSource={roomsdata?.data}
+                  fields={{text: 'name', value: 'id'}}
+                  // value={props && props.gameTypeId ? props.gameTypeId : null}
+                  style={{width: '100%'}}
+                />
+                {/* <Input
                 type='number'
                 style={{width: '100%'}}
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
               /> */}
-            </Form.Item>
-            <div style={{display: 'flex', justifyContent: 'end'}}>
-              <Button key='cancel' onClick={cancelTransferModal} className='me-3'>
-                Cancel
-              </Button>
-              <Button key='confirm' type='primary' htmlType='submit' className='me-3'>
-                Check Availability
-              </Button>
-              <Button key='confirm' className='btn btn-danger text-center' disabled={isUnAvailable} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                Confirm
-              </Button>
-
-
-            </div>
-          </Form>
-        </Modal>
+              </Form.Item>
+              <Form.Item
+                name={'bookEnd'}
+                label='End Date'
+                rules={[{required: true, message: 'Please select a date'}]}
+                hasFeedback
+                style={{width: '100%'}}
+                labelCol={{span: 5}}
+              >
+                <DatePicker 
+                // showTime format='YYYY-MM-DD HH:mm:ss' 
+                showTime format="dddd, MMMM D, YYYY HH:mm"
+                className='e-field'
+                // value={selectedDate}
+                value={selectedItemBookEnd}
+                defaultOpen={selectedItemBookEnd}
+                defaultValue={selectedItemBookEnd}
+                defaultPickerValue={selectedItemBookEnd}
+                style={{width: '100%'}} />
+              </Form.Item>
+              <div style={{display: 'flex', justifyContent: 'end'}}>
+                <Button key='cancel' onClick={cancelTransferModal} className='me-3'>
+                  Cancel
+                </Button>
+                <Button key='checkAvailability' type='primary' htmlType='submit' className='me-3'>
+                  Check Availability
+                </Button>
+                <Button
+                  key='confirm'
+                  className='btn btn-danger text-center'
+                  disabled={isUnAvailable}
+                  style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                >
+                  Confirm
+                </Button>
+              </div>
+            </Form>
+          </Modal>
         </div>
       </KTCardBody>
     </div>

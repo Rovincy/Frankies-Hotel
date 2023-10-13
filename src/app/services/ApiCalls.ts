@@ -1,13 +1,19 @@
 import axios from 'axios'
 
-// export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
-export const Api_Endpoint = 'https://localhost:5001/api'
+export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
+// export const Api_Endpoint = 'https://localhost:5001/api'
 
 export const fetchRoomsTypes = () => {
   return axios.get(`${Api_Endpoint}/roomsType`)
 }
 export const fetchRooms = () => {
   return axios.get(`${Api_Endpoint}/rooms`)
+}
+export const fetchTaxes = () => {
+  return axios.get(`${Api_Endpoint}/tax`)
+}
+export const fetchSingleTax = (id:any) => {
+  return axios.get(`${Api_Endpoint}/tax/id?id=${id}`)
 }
 export const fetchCurrencies = () => {
   return axios.get(`${Api_Endpoint}/Currency`)

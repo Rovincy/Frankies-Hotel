@@ -47,16 +47,16 @@ export function AsideMenuMain() {
             title='Reservation' 
           /> */}
 
-        <AsideMenuItem
+        {/* <AsideMenuItem
           to='/front-office/service'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
           title='Services'
-        />
+        /> */}
 
         <AsideMenuItem
-          // to='billing/*'
-          to='#'
+          to='billing/*'
+          // to='#'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
           title='Billing'
@@ -503,6 +503,12 @@ export function AsideMenuMain() {
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
           title='Currency'
+        />
+        <AsideMenuItem
+          to='tax/'
+          hasBullet={false}
+          icon='/media/icons/duotune/general/gen005.svg'
+          title='Tax'
         />
           <AsideMenuItem
             to='roomType/'

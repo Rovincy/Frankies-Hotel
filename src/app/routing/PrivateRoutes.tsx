@@ -84,6 +84,9 @@ import { Roles } from '../modules/production/components/setup/roles/roles'
 import { RolesForm } from '../modules/production/components/setup/roles/RolesForm'
 import { Currency } from '../modules/production/components/setup/Currency/currency'
 import { CurrencyForm } from '../modules/production/components/setup/Currency/currencyForm'
+import { Taxes } from '../modules/production/components/setup/taxes/tax'
+import { TaxesForm } from '../modules/production/components/setup/taxes/taxesForm'
+import { TaxEditForm } from '../modules/production/components/setup/taxes/taxEditForm'
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -229,6 +232,33 @@ const PrivateRoutes = () => {
               <PageTitle breadcrumbs={accountBreadCrumbs}>Billing</PageTitle>
               {/* <FileUploadForm /> */}
               <Billing/>
+            </SuspensedView>
+          }
+        />
+         <Route
+          path='tax/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Taxes</PageTitle>
+              <Taxes/>
+            </SuspensedView>
+          }
+        />
+         <Route
+          path='/taxesForm/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>New Tax</PageTitle>
+              <TaxesForm/>
+            </SuspensedView>
+          }
+        />
+         <Route
+          path='/taxEditForm/:id'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit</PageTitle>
+              <TaxEditForm/>
             </SuspensedView>
           }
         />
