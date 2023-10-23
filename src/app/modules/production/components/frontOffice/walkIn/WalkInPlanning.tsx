@@ -85,7 +85,9 @@
 // export default WalkInPlanning;
 
 
-
+import {
+  Typography
+} from 'antd'
 import axios from 'axios'
 // import {Calendar} from './calendar/Calendar'
 import {Link, useNavigate} from 'react-router-dom'
@@ -100,12 +102,15 @@ import {Calendar} from './calendar/Calendar';
 import { GuestDetails } from '../../guestsFormEntry/GuestDetails';
 import { CheckIn } from './checkIn/checkIn';
 import { CheckOut } from './checkOut/checkOut';
+import { CheckOccupancy } from '../../../../../services/ApiCalls'
 
 const WalkInPlanning = () => {
+  const {data: roomAvailability, isLoading: roomAvailabilityLoad} = useQuery('roomAvailability', CheckOccupancy)
   let dropDownListObj: any
   const [chosenFilter, setChosenFilter] = useState(null)
   const [activeButton, setActiveButton] = useState('reservation');
   const navigate = useNavigate()
+  const {Text} = Typography
 
   const handleButtonClick = (buttonName: SetStateAction<string>) => {
     setActiveButton(buttonName);
@@ -138,7 +143,12 @@ const WalkInPlanning = () => {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
         <button style={{ flex: 1, height: '100%',border: 'none', backgroundColor: 'transparent', fontWeight: 'bold', fontSize: '16px', color: activeButton === 'checkout' ? '#fff' : '#333', cursor: 'pointer' }} onClick={() => handleButtonClick('checkout')}>Check Out</button>
       </div>
-
+      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
+        <Text style={{ fontWeight: 'bold', fontSize: '16px'}}>Occupied: {roomAvailability?.data["occupiedRooms"]}</Text>
+        </div>
+      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
+        <Text style={{ fontWeight: 'bold', fontSize: '16px'}}>Vacant: {roomAvailability?.data["vacantRooms"]}</Text>
+        </div>
           {/* <Space style={{marginBottom: 16}}>
           </Space>
           <div>
@@ -147,6 +157,7 @@ const WalkInPlanning = () => {
         </KTCardBody>
         {/* <Calendar chosenFilter={chosenFilter} /> */}
         {renderPage()}
+        
       </KTCard>
     </>
   )

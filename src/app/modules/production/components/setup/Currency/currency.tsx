@@ -141,9 +141,9 @@ const Currency = () => {
       width: 20,
       render: (_: any, record: any) => (
         <Space size='middle'>
-          {/* <Link to={`/employee-edit-form/${record.id}`}>
-          <span className='btn btn-light-info btn-sm delete-button' style={{ backgroundColor: 'blue', color: 'white' }}>Rooms</span>
-          </Link> */}
+          <Link to={`/currencyEditForm`} state={record}>
+          <span className='btn btn-light-info btn-sm delete-button'>Edit</span>
+          </Link>
 
           {/* <Link to={`/rooms/${parms.id}`} state={record.id}> */}
           <a
@@ -272,10 +272,10 @@ const Currency = () => {
                 </button>
               </Link>
 
-              <button type='button' className='btn btn-light-primary me-3'>
+              {/* <button type='button' className='btn btn-light-primary me-3'>
                 <KTSVG path='/media/icons/duotune/arrows/arr078.svg' className='svg-icon-2' />
                 Export
-              </button>
+              </button> */}
             </Space>
           </div>
           <Table

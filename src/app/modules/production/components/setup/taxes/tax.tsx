@@ -236,7 +236,7 @@ const Taxes = () => {
               </Link> */}
           <div className='d-flex justify-content-between'>
             
-            <Space style={{marginBottom: 16}}>
+            {/* <Space style={{marginBottom: 16}}>
               
               <Input
                 placeholder='Enter Search Text'
@@ -245,10 +245,7 @@ const Taxes = () => {
                 allowClear
                 value={searchText}
               />
-              {/* <Button type='primary' onClick={globalSearch}>
-                Search
-              </Button> */}
-            </Space>
+            </Space> */}
             <Space style={{marginBottom: 16}}>
              
               <Link to={`/taxesForm`}>

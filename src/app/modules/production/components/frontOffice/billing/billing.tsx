@@ -2,6 +2,7 @@ import {
   Button,
   Form,
   Input,
+  Select,
   InputNumber,
   Modal,
   Space,
@@ -20,7 +21,9 @@ import {Link, useNavigate, useParams} from 'react-router-dom'
 import {useQuery, useQueryClient, useMutation} from 'react-query'
 import {
   Api_Endpoint,
+  GuestCheckoutApi,
   addGuestBilling,
+  fetchActivePaymentMethods,
   fetchCurrencies,
   fetchGuestBilling,
   fetchGuests,
@@ -29,6 +32,7 @@ import {
 } from '../../../../../services/ApiCalls'
 import Checkbox from 'antd/es/checkbox/Checkbox'
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns'
+import { useAuth } from '../../../../auth'
 
 const Billing = () => {
   const [gridData, setGridData] = useState<any>([])
@@ -45,25 +49,47 @@ const Billing = () => {
   const [openCreditModal, setopenCreditModal] = useState(false)
   const {mutate: guestBilling} = useMutation((values: any) => addGuestBilling(values))
   const {data: currencydata, isLoading: currencyLoad} = useQuery('currency', fetchCurrencies)
+  const {data: activePaymentMethoddata, isLoading: activePaymentMethodLoad} = useQuery('paymentMethod', fetchActivePaymentMethods)
   const {data: roomsdata, isLoading: roomsLoad} = useQuery('rooms', fetchRooms)
   const {data: guestdata, isLoading: guestLoad} = useQuery('guests', fetchGuests)
   const {data: taxdata, isLoading: taxLoad} = useQuery('tax', fetchTaxes)
+  const {mutate: checkGuestOutQuery} = useMutation((values: any) => GuestCheckoutApi(values))
+  const parms: any = useParams()
   const {data: billingData, isLoading: billingLoad, refetch: refetchBillingData} = useQuery(
-    'AllGuestBillings',
+    ['AllGuestBillings', parms['*']],
     () => fetchGuestBilling(parms['*']), // Pass the id as an argument
     {
       //   enabled: yourIdHere !== undefined, // You can enable or disable the query based on whether id is defined
     }
   )
+  const {currentUser} = useAuth()
   const [customerForm] = Form.useForm()
   const [paymentForm] = Form.useForm()
   const [debitForm] = Form.useForm()
   const [creditForm] = Form.useForm()
   const queryClient = useQueryClient()
   const {Text} = Typography
-  const parms: any = useParams()
+  const parms2: any = useParams()
   const navigate = useNavigate();
+  
+//   const guest = guestdata?.data.find((e:any)=>{
+//     return e?.id===parseInt(parms['*'])
+//   })
+  
+//   console.log("guest:", guest)
+//   // console.log("defaultSelect:", defaultSelect)
+//   const[defaultSelect, setDefaultSelect] = useState<any>({
+//     value: parms['*'],
+//     label:`${guest?.firstname?.trim()} ${guest?.lastname?.trim()}`
+//   })
 
+//   const handleChangeId = (selectedOption:any ) => {
+//     setDefaultSelect(selectedOption)
+//     setNewCustomData(selectedOption['id'])
+//     queryClient.invalidateQueries('AllGuestBillings')
+//     navigate(`/Billing/${selectedOption['id']}`, {replace: true})
+//     // setLineManagerId(selectedOption?.value)
+//   };
   var totalDebit = 0
   var totalCredit = 0
   var totalBalance = 0
@@ -75,13 +101,22 @@ const Billing = () => {
   var totalConvertedBalance
   var convertedTaxedBalance = 0
   var symbol
+  var salesAmount : any
+  var subTotal =0
+
   //LocalRate
   var localRate =0
   
   //
   // totalDebit = totalDebit + newDebit
   // totalCredit = totalCredit + newCredit
-  // console.log(billingData?.data)
+  currencydata?.data.map((cc: any) => {
+    // console.log(cc.symbol?.trim()==="GHS".trim())
+    // console.log(cc.symbol?.trim())
+    if (cc.symbol?.trim()==="GHS") {
+      localRate = cc.rate
+    }})
+
   var newBillingData = billingData?.data.map((b: any,index:any) => {
     var newCredit
     var newDebit
@@ -91,16 +126,15 @@ const Billing = () => {
     var date = new Date(b.timestamp)
     // console.log(currencydata?.data)
     currencydata?.data.map((c: any) => {
-      if (c.symbol?.trim()=="GHS") {
-        localRate = c.rate
-      }
+      
+      // console.log('localRate: ',localRate)
+      // console.log('c.symbol?.trim():',c.symbol?.trim())
       // console.log("b.currency: ",b.currency)
       // var trimmedSym= c.symbol?.trim()
       // var trimmedCur=b.currency
-      console.log('c.symbol?.trim()===b.currency:',c.symbol?.trim()===b.currency)
-      console.log('c.symbol?.trim():',c.symbol?.trim())
-      console.log('b.currency:',b.currency)
-      console.log('index:',index+1)
+      // console.log('c.symbol?.trim()===b.currency:',c.symbol?.trim()===b.currency)
+      // console.log('b.currency:',b.currency)
+      // console.log('index:',index+1)
       if (c.symbol?.trim()===b.currency?.trim()) {
         newCredit = (b.credit/c.rate).toFixed(2)
         newDebit = (b.debit/c.rate).toFixed(2)
@@ -120,6 +154,8 @@ const Billing = () => {
   totalConvertedDebit= parseFloat((parseFloat(totalDebit.toFixed(2)) * localRate).toFixed(2))
   totalConvertedBalance= parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))<0?`(${parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))*(-1)})`:parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))
   convertedTaxedBalance = parseFloat((parseFloat(taxedBalance.toFixed(2)) * localRate).toFixed(2))
+  // console.log('convertedTaxedBalance1: ',convertedTaxedBalance)
+  // console.log('localRate',localRate)
     })
     roomsdata?.data.map((r:any)=>{
       if (b.roomId===r.id) {
@@ -185,44 +221,72 @@ const Billing = () => {
         //   );
         // });
           let vat: any;
-const Taxes = taxdata?.data.map((item: any, index: number) => {
+const VAT_Taxes = taxdata?.data.map((item: any, index: number) => {
   if(convertedTaxedBalance<0){
     convertedTaxedBalance = convertedTaxedBalance * (-1)
   }
-  // Check the condition for each item
-  if (item.isLevy === null || item.isLevy === false) {
+  // // Check the condition for each item
+   if(item.isLevy === null || item.isLevy === false){
     // Calculate VAT for the item with its individual rate
      vat = (convertedTaxedBalance * item.rate) / (100 + item.rate);
 
     return (
-      <div key={index} style={{ textAlign: 'right', marginRight: '20px' }}>
+      <div key={index} style={{ textAlign: 'right', marginRight: '65px' }}>
         <p>
-          {item.name}: {vat.toFixed(2)} GHS
-        </p>
-      </div>
-    );
-  } else {
-    var salesAmount = ((convertedTaxedBalance-vat)/107)*100
-    var subTotal = convertedTaxedBalance - vat
-    // console.log('salesAmount: ',salesAmount.toFixed(2))
-    // console.log('subTotal: ',subTotal.toFixed(2))
-    const levy = (salesAmount * item.rate) / (100);
-    return (
-      <div key={index} style={{ textAlign: 'right', marginRight: '20px' }}>
-        <p>
-          {item.name}: {levy.toFixed(2)} GHS
+          {item.name}: GHS {vat.toFixed(2)}
         </p>
       </div>
     );
   }
 });
+const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
+  if(convertedTaxedBalance<0){
+    convertedTaxedBalance = convertedTaxedBalance * (-1)
+  }
+  // Check the condition for each item
+   if (item.isLevy === true){
+    salesAmount = ((convertedTaxedBalance-vat)/107)*100
+    // var subTotal = convertedTaxedBalance - vat
+    // console.log('salesAmount: ',salesAmount.toFixed(2))
+    // console.log('subTotal: ',subTotal.toFixed(2))
+    // console.log('convertedTaxedBalance: ',convertedTaxedBalance.toFixed(2))
+    const levy = (salesAmount * item.rate) / (100);
+    subTotal = subTotal + levy
+    return (
+      <div key={index} style={{ textAlign: 'right', marginRight: '65px' }}>
+        <p>
+          {item.name}: GHS {levy.toFixed(2)}
+        </p>
+      </div>
+    );
+  }
+  // else {
+  //   // Calculate VAT for the item with its individual rate
+  //    vat = (convertedTaxedBalance * item.rate) / (100 + item.rate);
+
+  //   return (
+  //     <div key={index} style={{ textAlign: 'right', marginRight: '45px' }}>
+  //       <p>
+  //         {item.name}: {vat.toFixed(2)} GHS
+  //       </p>
+  //     </div>
+  //   );
+  // }
+});
 
   var guestListData = guestdata?.data.map((e:any)=>{
     return {
+      // value: e.id,
+      // label: `${e.firstname?.trim()} ${e.lastname?.trim()}`,
       id: e.id,
       name: `${e.firstname?.trim()} ${e.lastname?.trim()}`
     }
   })
+
+//   const customOptions = guestListData?.map((item: any) => ({
+//     value: item.id,
+//     label: item.firstName + ' ' + item.lastName
+//   }))
   
 
   // console.log('totalBalance:',totalBalance);
@@ -328,7 +392,7 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
     // console.log("Hello")
     value.customerId = parms['*']
     value.isPayment = true
-    console.log(value)
+    // console.log(value)
 
     guestBilling(value, {
       onSuccess: () => {
@@ -336,6 +400,7 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
         setopenPaymentModal(false)
         paymentForm.resetFields()
         queryClient.invalidateQueries('AllGuestBillings')
+        queryClient.invalidateQueries('paymentMethod')
       },
       onError(error, variables, context) {
         message.destroy('Error occurred while submitting payment')
@@ -378,24 +443,15 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
   }
 
   const custForm = (value:any) => {
-    // console.log("Hello")
-    // console.log(value)
-    // console.log(value['value'])
-    // console.log(value.guestId)
-    // console.log(value['guestId'])
     setNewCustomData(value['value'])
-    // history.go(value['value']);
     queryClient.invalidateQueries('AllGuestBillings')
     navigate(`/Billing/${value['value']}`, {replace: true})
-    // parms['*']=customData
-
-
-    // customerForm.resetFields()
   }
   // useEffect(()=>{
   // },)
   useEffect(()=>{
-    parms['*'] = customData
+    // parms['*'] = customData
+
     // console.log(parms['*'])
     // console.log('newBillingData: ',newBillingData)
     refetchBillingData();
@@ -633,6 +689,42 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
   //       loadData()
   //     }
   //   }
+  const settleRemainingBalance = ()=>{
+    message.warning("Please settle remaining amount before proceeding")
+  }
+  const checkGuestOut = (value:any) => {
+    // if (guestData.checkInTime === null) {
+    //   message.info('Please, check In before you check out!')
+    //   return
+    // }
+    var guestData = {
+      'id':parms2['*']
+    }
+    // console.log(value)
+    // console.log("Hello World")
+    // console.log(guestData)
+    // console.log(parms['*'])
+    // console.log(customData)
+    // console.log(parms2)
+
+    Modal.confirm({
+      okText: 'Confirm',
+      okType: 'primary',
+      title: 'Kindly confirm check-out!',
+      onOk: () => {
+        checkGuestOutQuery(guestData, {
+          onSuccess: () => {
+            message.success('Guest successfully ckecked out!')
+            queryClient.invalidateQueries('currency')
+            queryClient.invalidateQueries('rooms')
+            queryClient.invalidateQueries('guests')
+            queryClient.invalidateQueries('tax')
+            window.print()
+          },
+        })
+      },
+    })
+  }
 
   const globalSearch = () => {
     // @ts-ignore
@@ -691,7 +783,7 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
               </Link> */}
               
               <div style={{display:'flex', flex:'start'}}>
-              <Form form={customerForm} onFinish={custForm} style={{width:'40%'}}>
+              <Form form={customerForm} style={{width:'40%'}}>
               <Form.Item
                 name={'guestId'}
                 // label='Customer'
@@ -700,12 +792,21 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
                 style={{width: '100%'}}
                 labelCol={{span: 5}}
               >
+                {/* <Select  
+                  isSearchable
+                  defaultValue={defaultSelect}
+                  // value={defaultSelect}
+                  onChange={handleChangeId}
+                  // styles={{:""}}
+                  options={guestListData}/> */}
                 <DropDownListComponent
                   id='guest'
                   placeholder='Guest'
                   data-name='guest'
                   className='e-field'
                   dataSource={guestListData}
+                  
+                  // value={9}
                   fields={{text: 'name', value: 'id'}}
                   onChange={custForm}
                   style={{width: '100%'}}
@@ -766,11 +867,11 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
             </Col>
             <Col span={2} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>{totalDebit} USD</Text>
+              <Text>USD {totalDebit.toFixed(2)}</Text>
             </Col>
             <Col span={3} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>{totalCredit} USD</Text>
+              <Text>USD {totalCredit.toFixed(2)}</Text>
             </Col>
             <Col span={1} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
@@ -792,11 +893,14 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
             </Col>
             <Col span={4} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>{totalConvertedDebit} GHS</Text>
+              <Text>GHS {totalConvertedDebit}</Text>
             </Col>
-            <Col span={4} style={{background:"none", textAlign:"end"}}>
+            <Col span={3} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>{symbol}{totalConvertedCredit} GHS</Text>
+              <Text>GHS {totalConvertedCredit}</Text>
+            </Col>
+            <Col span={1} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
             </Col>
           </Row>
           
@@ -818,14 +922,29 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
               {/* <Text>{totalDebit}</Text> */}
               <Text style={{fontWeight:"bold"}}>Balance</Text>
             </Col>
-            <Col span={4} style={{background:"none", textAlign:"end"}}>
+            <Col span={3} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text style={{fontWeight:"bold"}}>{symbol}{totalConvertedBalance} GHS</Text>
+              <Text style={{fontWeight:"bold"}}>GHS {totalConvertedBalance}</Text>
+            </Col>
+            <Col span={1} style={{background:"none", textAlign:"end"}}>
+              {/* <Text>{totalDebit}</Text> */}
             </Col>
           </Row>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <Text style={{ textAlign: 'right', marginRight: '65px', marginTop:'10px' }}>
+            SALES AMOUNT: GHS {salesAmount?.toFixed(2)}
+            </Text>
             <Text>
-            {Taxes}
+            {LEVY_Taxes}
+            </Text>
+            <Text style={{ textAlign: 'right', marginRight: '65px' }}>
+            SUB-TOTAL: GHS {(salesAmount+subTotal).toFixed(2)}
+            </Text>
+            <Text>
+            {VAT_Taxes}
+            </Text>
+            <Text style={{ textAlign: 'right', marginRight: '65px', fontWeight:'bold' }}>
+            GRAND TOTAL: GHS {totalConvertedDebit.toFixed(2)}
             </Text>
           </div>
           {/* <Row gutter={24}>
@@ -833,37 +952,51 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
             <Col span={12}>{symbol}{totalConvertedCredit}</Col>
           </Row> */}
         </div>
-        <Space style={{marginBottom: 16}}>
+        {currentUser?.role.toString().toLocaleLowerCase()==="Manager".toLowerCase()?null:(<Space style={{marginBottom: 16}}>
           {/* <Link to={'#'} > */}
           <button type='button' className='btn btn-primary me-3' onClick={addPayment}>
             <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
             Payment
           </button>
           {/* </Link> */}
-        </Space>
-        <Space style={{marginBottom: 16}}>
+        </Space>)}
+        {currentUser?.role.toString().toLocaleLowerCase()==="Cashier".toLowerCase()?null:(<Space style={{marginBottom: 16}}>
           <Link to={`#`}>
             <button type='button' className='btn btn-primary me-3' onClick={addDebit}>
               <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
               Debit Note
             </button>
           </Link>
-        </Space>
-        <Space style={{marginBottom: 16}}>
+        </Space>)}
+        {currentUser?.role.toString().toLocaleLowerCase()==="Cashier".toLowerCase()?null:(<Space style={{marginBottom: 16}}>
           <Link to={`#`}>
             <button type='button' className='btn btn-primary me-3' onClick={addCredit}>
               <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
               Credit Note
             </button>
           </Link>
-        </Space>
+        </Space>)}
         <Space style={{marginBottom: 16}}>
-          <Link to={`#`}>
-            <button type='button' className='btn btn-primary me-3'>
+        {currentUser?.role.toString().toLocaleLowerCase()==="Manager".toLowerCase()?null:(<Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3' onClick={(totalConvertedCredit-totalConvertedDebit)<0?settleRemainingBalance:checkGuestOut}>
               {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
               Close
             </button>
-          </Link>
+          </Link>)}
+          {/* <a
+            href='#'
+            className='btn btn-primary me-3'
+            onClick={() =>
+              checkGuestOut()
+            }
+          >
+            Close
+          </a> */}
+          {/* <Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3'>
+              Close
+            </button>
+          </Link> */}
         </Space>
         <Modal
           open={openPaymentModal}
@@ -874,7 +1007,9 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
           // onOk={handleOk}
           footer={null}
         >
-          <Form form={paymentForm} onFinish={newPayment}>
+          <Form form={paymentForm} onFinish={newPayment}
+          layout='vertical'
+          >
             <Form.Item
               name={'timestamp'}
               label='Date'
@@ -928,7 +1063,20 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
               style={{width: '100%'}}
               labelCol={{span: 5}}
             >
-              <DropDownListComponent
+              <Select
+              id='currency'
+              // name='currency'
+              className='e-field'
+              style={{ width: '100%' }}
+              placeholder='Currency'
+            >
+              {currencydata?.data.map((item:any) => (
+                <Select.Option key={item.symbol} value={item.symbol}>
+                  {item.symbol}
+                </Select.Option>
+              ))}
+            </Select>
+              {/* <DropDownListComponent
                   id='currency'
                   placeholder='Currency'
                   data-name='currency'
@@ -937,7 +1085,55 @@ const Taxes = taxdata?.data.map((item: any, index: number) => {
                   fields={{text: 'symbol', value: 'symbol'}}
                   // value={props && props.gameTypeId ? props.gameTypeId : null}
                   style={{width: '100%'}}
-                />
+                /> */}
+            </Form.Item>
+            <Form.Item
+              name={'paymentMethod'}
+              label='Payment Method'
+              rules={[{required: true, message: 'Please select a payment method'}]}
+              hasFeedback
+              // style={{width: '100%'}}
+              // labelCol={{span: 5}}
+            >
+              {/* <Select
+                  id='paymentMethod'
+                  name='paymentMethod'
+                  className='e-field'
+                  style={{ width: '100%' }}
+                >
+                  <option value='' disabled selected>
+                    paymentMethod
+                  </option>
+                  {activePaymentMethoddata?.data.map((item:any) => (
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </Select> */}
+                <Select
+                  id='paymentMethod'
+                  // name='paymentMethod'
+                  className='e-field'
+                  style={{ width: '100%' }}
+                  placeholder='paymentMethod'
+                >
+                  {activePaymentMethoddata?.data.map((item:any) => (
+                  <Select.Option key={item.name} value={item.name}>
+                    {item.name}
+                  </Select.Option>
+                ))}
+                              </Select>
+
+              {/* <DropDownListComponent
+                  id='paymentMethod'
+                  placeholder='paymentMethod'
+                  data-name='paymentMethod'
+                  className='e-field'
+                  dataSource={activePaymentMethoddata?.data}
+                  fields={{text: 'name', value: 'name'}}
+                  // value={props && props.gameTypeId ? props.gameTypeId : null}
+                  style={{width: '100%'}}
+                /> */}
             </Form.Item>
             <div style={{display: 'flex', justifyContent: 'end'}}>
               <Button key='cancel' onClick={cancelBillModal} className='me-3'>

@@ -63,7 +63,7 @@ const Users = () => {
   const userAndRoles = usersData?.data.map((e: any) => {
     // console.log('e', e)
 
-    const role = roles.find((x: any) => {
+    const role = roles?.find((x: any) => {
       // console.log("x", x)
 
       if (x.id === e.roleId) {
@@ -73,6 +73,7 @@ const Users = () => {
 
     // console.log('dat',role)
     return {
+      id:e?.id,
       lastName: e?.lastName,
       firstName: e?.firstName,
       username: e?.username,
@@ -194,12 +195,11 @@ const Users = () => {
       width: 20,
       render: (_: any, record: any) => (
         <Space size='middle'>
-          {/* <Link to={`/services/details/${record.id}`}>
+          {/* <Link to={`/users/userEditForm/`} state={record}>
             <a href='#' className='btn btn-light-primary btn-sm'>
               Edit
             </a>
           </Link> */}
-          {/* <Link to={`/employee-edit-form/${record.id}`}> */}
           <a
             href='#'
             className='btn btn-light-danger btn-sm'

@@ -74,6 +74,8 @@ export interface UserModel {
   email: string
   firstName: string
   lastName: string
+  roleId:number
+  role:string
   // fullname?: string
   // occupation?: string
   // companyName?: string

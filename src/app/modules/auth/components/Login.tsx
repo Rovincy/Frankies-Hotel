@@ -40,11 +40,11 @@ export function Login() {
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, {setStatus, setSubmitting}) => {
-      console.log(values)
+      // console.log(values)
       setLoading(true)
       try {
         const {data: auth} = await login(values.username, values.password)
-        console.log(auth)
+        // console.log(auth)
         saveAuth(auth)
         // console.log(auth.jwtToken);
         // console.log(auth.api_token);
@@ -63,10 +63,12 @@ export function Login() {
           email: decodedToken.email,
           lastName: decodedToken.lastName,
           firstName: decodedToken.firstName,
-          password: decodedToken.password
+          password: decodedToken.password,
+          roleId:decodedToken.roleId,
+          role:decodedToken.role
           // fill in the rest of the fields as necessary
       };
-      console.log('user: ',user)
+      // console.log('user: ',user)
 
         // setCurrentUser(user)
         setCurrentUser(user)

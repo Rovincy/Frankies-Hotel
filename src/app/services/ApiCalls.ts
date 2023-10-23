@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+// export  const Api_Endpoint ="http://3.74.54.13//frankiesHotelAPI/api";
 export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
 // export const Api_Endpoint = 'https://localhost:5001/api'
 
@@ -18,6 +19,12 @@ export const fetchSingleTax = (id:any) => {
 export const fetchCurrencies = () => {
   return axios.get(`${Api_Endpoint}/Currency`)
 }
+export const fetchPaymentMethods = () => {
+  return axios.get(`${Api_Endpoint}/PaymentMethod`)
+}
+export const fetchActivePaymentMethods = () => {
+  return axios.get(`${Api_Endpoint}/PaymentMethod/ActivePaymentMethod`)
+}
 export const fetchServiceCategoryApi = () => {
   return axios.get(`${Api_Endpoint}/Service`)
 }
@@ -35,6 +42,9 @@ export const fetchNotes = () => {
 }
 export const fetchBookings = () => {
   return axios.get(`${Api_Endpoint}/Booking`)
+}
+export const CheckOccupancy = () => {
+  return axios.get(`${Api_Endpoint}/Booking/CheckOccupancy`)
 }
 export const fetchGuestBilling = (id: any) => {
   return axios.get(`${Api_Endpoint}/Billing/id?id=${id}`, id)
@@ -90,12 +100,56 @@ export const addGuestServiceApi = (values: any) => {
 export const addGuestBilling = (values: any) => {
   return axios.post(`${Api_Endpoint}/Billing/`, values)
 }
+export const nightAudit = (id: any) => {
+  return axios.post(`${Api_Endpoint}/NightAudit?guestId=${id}`)
+}
 export const addHouseItemApi = (values: any) => {
   return axios.post(`${Api_Endpoint}/HouseKeeping/`, values)
 }
 
 export const cancelBookingApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/Booking/${id}`, id)
+}
+export const saveTransfer = (value: any) => {
+  // value.bookEnd = value.bookEnd.toISOString()
+  // value.bookStart = value.bookStart.toISOString()
+//   const originalDate = new Date(value.bookEnd);
+
+// // Extract year, month, and day components
+// const year = originalDate.getFullYear();
+// const month = (originalDate.getMonth() + 1).toString().padStart(2, '0');
+// const day = originalDate.getDate().toString().padStart(2, '0');
+
+// const hours = originalDate.getHours().toString().padStart(2, '0');
+// const minutes = originalDate.getMinutes().toString().padStart(2, '0');
+
+// // Create the formatted date and time string in the format "YYYY-MM-DD HH:mm"
+// const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+// value.bookEnd = formattedDateTime
+// value.bookStart = formattedDateTime
+console.log("api: ",value.bookEnd)
+console.log("api: ",value)
+
+  return axios.put(`${Api_Endpoint}/Booking/RoomTransfer/`, value)
+}
+export const checkRoomAvailability = (value:any) => {
+  console.log('From API: ',value)
+  // Assuming value.bookEnd is a valid date string
+const originalDate = new Date(value.bookEnd);
+
+// Extract year, month, and day components
+const year = originalDate.getFullYear();
+const month = (originalDate.getMonth() + 1).toString().padStart(2, '0');
+const day = originalDate.getDate().toString().padStart(2, '0');
+
+const hours = originalDate.getHours().toString().padStart(2, '0');
+const minutes = originalDate.getMinutes().toString().padStart(2, '0');
+
+// Create the formatted date and time string in the format "YYYY-MM-DD HH:mm"
+const formattedDateTime = `${year}-${month}-${day}`;
+
+// console.log('Formatted Date and Time: ', formattedDateTime);
+  return axios.get(`${Api_Endpoint}/Booking/CheckRoomAvailability?roomId=${value.roomId}&bookEnd=${formattedDateTime}`)
 }
 export const deleteRoomTypeApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/RoomsType/${id}`, id)

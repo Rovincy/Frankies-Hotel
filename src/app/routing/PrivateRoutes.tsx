@@ -28,7 +28,6 @@ import {EmployeeReportPage} from '../modules/production/components/report/Employ
 import {PayrollReportPage} from '../modules/production/components/report/PayrollReportPage'
 import {HrReportPage} from '../modules/production/components/report/HrReportPage'
 import EmployeeAgeRangeReport from '../modules/production/components/report/EmployeeAgeRangeReport'
-import EmployeeListReport from '../modules/production/components/report/EmployeeListReport'
 import EmployeeAgeSummaryReport from '../modules/production/components/report/EmployeeAgeSummaryReport'
 import EmployeeFamilyReport from '../modules/production/components/report/EmployeeFamilyReport'
 import EmployeeFamilySummaryReport from '../modules/production/components/report/EmployeeFamilySummaryReport'
@@ -77,7 +76,6 @@ import { Service } from '../modules/production/components/frontOffice/service/se
 import { Payment } from '../modules/production/components/frontOffice/billing/payment'
 import { Billing } from '../modules/production/components/frontOffice/billing/billing'
 import ReportComponent from '../modules/production/components/Reports/ReportComponent'
-import RoomHistoryReport from '../modules/production/components/report/EmployeeListReport'
 import { Users } from '../modules/production/components/setup/users/Users'
 import { UsersForm } from '../modules/production/components/setup/users/UsersForm'
 import { Roles } from '../modules/production/components/setup/roles/roles'
@@ -87,6 +85,14 @@ import { CurrencyForm } from '../modules/production/components/setup/Currency/cu
 import { Taxes } from '../modules/production/components/setup/taxes/tax'
 import { TaxesForm } from '../modules/production/components/setup/taxes/taxesForm'
 import { TaxEditForm } from '../modules/production/components/setup/taxes/taxEditForm'
+import { CurrencyEditForm } from '../modules/production/components/setup/Currency/currencyEditForm'
+import { UserEditForm } from '../modules/production/components/setup/users/userEditForm'
+import { PaymentMethod } from '../modules/production/components/setup/PaymentMethod/paymentMethod'
+import { PaymentMethodForm } from '../modules/production/components/setup/PaymentMethod/paymentMethodForm'
+import { PaymentMethodEditForm } from '../modules/production/components/setup/PaymentMethod/paymentMethodEditForm'
+import ArrivalDepartureStayOverReport from '../modules/production/components/report/ArrivalDepartureStayOverReport'
+import RoomHistoryReport from '../modules/production/components/report/EmployeeListReport'
+import GuestLedgerReport from '../modules/production/components/report/GuestLedgerReport'
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -187,11 +193,47 @@ const PrivateRoutes = () => {
           }
         />
         <Route
+          path='currencyEditForm/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit</PageTitle>
+              <CurrencyEditForm />
+            </SuspensedView>
+          }
+        />
+        <Route
           path='currencyForm/'
           element={
             <SuspensedView>
               <PageTitle breadcrumbs={accountBreadCrumbs}>Currency</PageTitle>
               <CurrencyForm />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='paymentMethod/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Payment Method</PageTitle>
+              <PaymentMethod />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='/paymentMethodForm'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Form</PageTitle>
+              <PaymentMethodForm />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='/paymentMethodEditForm'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit Form</PageTitle>
+              <PaymentMethodEditForm />
             </SuspensedView>
           }
         />
@@ -370,6 +412,15 @@ const PrivateRoutes = () => {
             <SuspensedView>
               <PageTitle breadcrumbs={accountBreadCrumbs}>Users</PageTitle>
               <Users/>
+            </SuspensedView>
+          }
+        />
+         <Route
+          path='/users/userEditForm/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit</PageTitle>
+              <UserEditForm/>
             </SuspensedView>
           }
         />
@@ -632,8 +683,26 @@ const PrivateRoutes = () => {
           path='RoomHistoryReport/*'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>EmployeeListReport</PageTitle>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Room History Report</PageTitle>
               <RoomHistoryReport />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='ArrivalDepartureStayOverReport/*'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Arrival, Departure, Stay Over Report</PageTitle>
+              <ArrivalDepartureStayOverReport />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='GuestLedgerReport/*'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Guest Ledger Report</PageTitle>
+              <GuestLedgerReport />
             </SuspensedView>
           }
         />

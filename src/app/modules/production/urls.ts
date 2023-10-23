@@ -7,6 +7,7 @@ import axios from 'axios';
 // export const ENP_URL = 'http://208.117.44.15/SmWebApi/api'
 // export const BASE_URL = 'https://localhost:5001/api'
 export const BASE_URL = "https://app.sipconsult.net/frankiesHotelAPI/api"
+// export const BASE_URL = "http://3.74.54.13/frankiesHotelAPI/api"
 // export const ENP_URL = 'http://localhost:4192'
 
 

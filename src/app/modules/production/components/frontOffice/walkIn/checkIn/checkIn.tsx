@@ -19,7 +19,7 @@ import {useEffect, useState} from 'react'
 import axios from 'axios'
 import {KTCardBody, KTSVG} from '../../../../../../../_metronic/helpers'
 import {BASE_URL} from '../../../../urls'
-import {Link} from 'react-router-dom'
+import {Link, Navigate, useNavigate} from 'react-router-dom'
 import {employeedata} from '../../../../../../data/DummyData'
 import {useMutation, useQuery, useQueryClient} from 'react-query'
 import moment from 'moment';
@@ -35,6 +35,9 @@ import GuestCheckinApi, {
   fetchGuestServiceApi,
   currencyConverterApi,
   updateGuestApi,
+  checkRoomAvailability,
+  saveTransfer,
+  nightAudit,
 } from '../../../../../../services/ApiCalls'
 import {DropDownListComponent} from '@syncfusion/ej2-react-dropdowns/src/drop-down-list/dropdownlist.component'
 import TextArea from 'antd/es/input/TextArea'
@@ -68,11 +71,14 @@ const CheckIn = () => {
   const {mutate: addReservation} = useMutation((values: any) => addBookingApi(values))
   const queryClient = useQueryClient()
   const {mutate: checkGuestOutQuery} = useMutation((values: any) => GuestCheckoutApi(values))
+  const {mutate: runNightAudit} = useMutation((values: any) => nightAudit(values))
   // const {mutate: checkGuestInQuery} = useMutation((values: any) => GuestCheckinApi(values))
   const [openAddServiceModal, setopenAddServiceModal] = useState(false)
   const [openTransferModal, setopenTransferModal] = useState(false)
   const [openGenerateModal, setopenGenerateModal] = useState(false)
   const {mutate: addGuestService} = useMutation((values: any) => addGuestServiceApi(values))
+  const {mutate: checkIfAvailability} = useMutation((values: any) => checkRoomAvailability(values))
+  const {mutate: submitRoomTransfer} = useMutation((values: any) => saveTransfer(values))
   const {data: fetchGuestServiceData, isLoading: fetchGuestServiceLoading} = useQuery(
     'fetchGuestServiceQuery',
     fetchGuestServiceApi
@@ -94,6 +100,7 @@ const CheckIn = () => {
   const [servicePaymentData, setServicePaymentData] = useState<any>([])
   const [totalGuestBill, setTotalBill] = useState(0)
   let totalBill = 0
+  const navigate = useNavigate();
   roomsdata?.data.map((item: any) => {
     roomsOptions.push({value: item.id, label: item.name})
   })
@@ -103,6 +110,17 @@ const CheckIn = () => {
   const [serviceForm] = Form.useForm()
   const [transferForm] = Form.useForm()
   const [isUnAvailable, setCheckUnAvailability] = useState(true)
+
+  const [formData, setFormData] = useState({
+    roomId: null, // Initialize with default values or null as needed
+    bookEnd: null,
+    prv_roomId: null,
+    customerId:null,
+    // bookStart:null,
+    // prv_bookEnd:null,
+    id:null
+  });
+  var tableValue: any
   const convertFromCedis = (e: any) => {
     let amount = 0
     currencyConverterApi('GHS', 'USD').then((res) =>
@@ -215,13 +233,21 @@ const CheckIn = () => {
     setCheckUnAvailability(true)
     transferForm.resetFields()
   }
-  var selectedItemBookEnd
+  var selectedItemBookEnd:any
+  var customerId
+  var prv_roomId
+  var id
   const displayTransferModal = (value: any) => {
+    // const { roomId, bookEnd } = formData;
     tableValue = value
-    // console.log(tableValue)
-    // console.log('tableValue: ', tableValue['bookStart'])
-    // console.log('tableValue: ', tableValue['bookEnd'])
+    console.log(tableValue)
+    console.log('tableValue: ', tableValue['bookStart'])
+    console.log('tableValue: ', tableValue['bookEnd'])
     selectedItemBookEnd = tableValue['bookEnd']
+    // formData.bookStart = tableValue['bookStart']
+    formData.customerId = tableValue['guestId']
+    formData.prv_roomId = tableValue['roomId']
+    formData.id = tableValue['id']
     // console.log('selectedItemBookEnd: ', selectedItemBookEnd)
     setopenTransferModal(true)
   }
@@ -339,7 +365,6 @@ const CheckIn = () => {
   //   }
   // }
 
-  var tableValue: any
   const serviceColumns: any = [
     {
       title: 'Service',
@@ -483,9 +508,26 @@ const CheckIn = () => {
             Transfer
             {/* {spinner?"Generate Bill":<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin rev={undefined} />} />} */}
           </a>
-          <Link to={`/Billing/${record.guestId}`} className='btn btn-light-primary btn-sm'>
+          {/* <Link to={`/Billing/${record.guestId}`} className='btn btn-light-primary btn-sm'>
             Check Out
-          </Link>
+          </Link> */}
+          <a
+            href='#'
+            className='btn btn-light-primary btn-sm'
+            onClick={() =>
+              runNightAudit(record.guestId, {
+                onSuccess: () => {
+                  // message.success('Audit run successfully')
+                  navigate(`/Billing/${record.guestId}`, {replace: true})
+                  // queryClient.invalidateQueries('Bookings')
+                  // queryClient.invalidateQueries('Guests')
+                  // queryClient.invalidateQueries('rooms')
+                },
+              })
+            }
+          >
+            Check Out
+          </a>
           {/* <a
             href='#'
             className='btn btn-light-primary btn-sm'
@@ -837,26 +879,61 @@ const CheckIn = () => {
 
     serviceForm.resetFields()
   }
+
+  const submitTransfer = (value:any)=>{
+    // console.log('Test Called')
+    console.log(value)
+    const { roomId, bookEnd,prv_roomId,customerId,id } = formData;
+
+    // Do something with the form data, e.g., submit it to your server
+    // console.log('Form Data:', formData);
+    // console.log('roomId:', formData.roomId);
+
+    runNightAudit(formData.customerId, {
+      onSuccess: () => {
+        // message.success('Audit run successfully')
+        // navigate(`/Billing/${record.guestId}`, {replace: true})
+        // queryClient.invalidateQueries('Bookings')
+        // queryClient.invalidateQueries('Guests')
+        // queryClient.invalidateQueries('rooms')
+        
+        submitRoomTransfer(formData, {
+      onSuccess: () => {
+        message.success('Transfer successful')
+        setCheckUnAvailability(false)
+        setopenTransferModal(false)
+        // setopenPaymentModal(false)
+        // paymentForm.resetFields()
+        queryClient.invalidateQueries('Guests')
+        queryClient.invalidateQueries('rooms')
+        queryClient.invalidateQueries('Bookings')
+        queryClient.invalidateQueries('fetchServicesDetails')
+        transferForm.resetFields()
+      },
+      onError(error, variables, context) {
+        message.destroy('Room not available')
+      },
+    })
+      },
+    })
+  }
   const newTransfer = (value: any) => {
     // console.log('Hello')
     // console.log(value)
     // console.log('///')
+    // setFormData(value)
+    formData.roomId = value.roomId
+    formData.bookEnd = value.bookEnd?.toISOString()
     // console.log(tableValue)
-    setCheckUnAvailability(false)
-
-    // serviceData.totalPrice = 0
-    // serviceData.isPaid = 0
-    // serviceData.bookingId = bookingId
-    // serviceData.unitPrice = priceValue
-    // serviceData.roomId = guestroomId
-    // serviceData.guestId = guestId
-    // setAllServiceData((prevAllServicesArr: any) => [...prevAllServicesArr, serviceData])
-    // arr.push(serviceData)
-    // // setAllServiceData(allServicesArr)
-    // setpriceValue(false)
-    // setTotalPrice(0)
-
-    // transferForm.resetFields()
+    checkIfAvailability(value, {
+      onSuccess: () => {
+        message.success('Room available')
+        setCheckUnAvailability(false)
+      },
+      onError(error, variables, context) {
+        message.destroy('Room not available')
+      },
+    })
   }
   const checkAvailability = () => {
     console.log('Check Availability')
@@ -1336,8 +1413,6 @@ const CheckIn = () => {
             okText='Confirm'
             title='Select new Room'
             closable={true}
-            // onCancel={cancelTransferModal}
-            // onOk={handleOk}
             footer={null}
           >
             <Form form={transferForm} onFinish={newTransfer}>
@@ -1354,17 +1429,11 @@ const CheckIn = () => {
                   placeholder='Room'
                   data-name='room'
                   className='e-field'
+                  // onChange={setCheckUnAvailability(true)}
                   dataSource={roomsdata?.data}
                   fields={{text: 'name', value: 'id'}}
-                  // value={props && props.gameTypeId ? props.gameTypeId : null}
                   style={{width: '100%'}}
                 />
-                {/* <Input
-                type='number'
-                style={{width: '100%'}}
-                //   disabled={!priceValue}
-                //   onChange={onChangeForPrice}
-              /> */}
               </Form.Item>
               <Form.Item
                 name={'bookEnd'}
@@ -1375,10 +1444,8 @@ const CheckIn = () => {
                 labelCol={{span: 5}}
               >
                 <DatePicker 
-                // showTime format='YYYY-MM-DD HH:mm:ss' 
                 showTime format="dddd, MMMM D, YYYY HH:mm"
                 className='e-field'
-                // value={selectedDate}
                 value={selectedItemBookEnd}
                 defaultOpen={selectedItemBookEnd}
                 defaultValue={selectedItemBookEnd}
@@ -1393,9 +1460,12 @@ const CheckIn = () => {
                   Check Availability
                 </Button>
                 <Button
-                  key='confirm'
+                  key='submit'
+                  type='primary'
+                  // htmlType='submit'
                   className='btn btn-danger text-center'
                   disabled={isUnAvailable}
+                  onClick={submitTransfer}
                   style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 >
                   Confirm

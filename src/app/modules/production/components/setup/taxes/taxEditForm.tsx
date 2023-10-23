@@ -86,7 +86,7 @@ const TaxEditForm= () =>{
         const response = await axios.put(url, data)
         setLoading(false)
         reset()
-        console.log(response)
+        // console.log(response)
         navigate(`/tax/`, {replace: true})
         if (response.status===200) {
           message.success("Tax updated successfully")
