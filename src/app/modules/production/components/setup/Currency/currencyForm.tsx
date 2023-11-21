@@ -139,7 +139,7 @@ const [isBase, setisBase] = useState(false);
               <input type="text"  {...register("name")}  className="form-control form-control-solid" />
               </div>
               <div className='col-6 mb-7'>
-                <label htmlFor="exampleFormControlInput1" className="required form-label">isBase</label>
+                <label htmlFor="exampleFormControlInput1" className="required form-label">Base Currency</label>
                 <Checkbox{...register("isBase")} className="form-control form-control-solid" onChange={(e) => setisBase(e.target.checked)}/>
               </div>
             </div>

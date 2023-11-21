@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-// export  const Api_Endpoint ="http://3.74.54.13//frankiesHotelAPI/api";
-export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
+export  const Api_Endpoint ="http://3.74.54.13//frankiesHotelAPI/api";
+// export  const Api_Endpoint ="https://app.sipconsult.net/frankiesHotelAPI/api";
 // export const Api_Endpoint = 'https://localhost:5001/api'
 
 export const fetchRoomsTypes = () => {
@@ -22,6 +22,9 @@ export const fetchCurrencies = () => {
 export const fetchPaymentMethods = () => {
   return axios.get(`${Api_Endpoint}/PaymentMethod`)
 }
+export const fetchPaymentNotes = () => {
+  return axios.get(`${Api_Endpoint}/PaymentNote`)
+}
 export const fetchActivePaymentMethods = () => {
   return axios.get(`${Api_Endpoint}/PaymentMethod/ActivePaymentMethod`)
 }
@@ -37,6 +40,9 @@ export const fetchRolesApi = () => {
 export const fetchGuests = () => {
   return axios.get(`${Api_Endpoint}/guests`)
 }
+export const fetchCompanies = () => {
+  return axios.get(`${Api_Endpoint}/company`)
+}
 export const fetchNotes = () => {
   return axios.get(`${Api_Endpoint}/notes`)
 }
@@ -46,8 +52,10 @@ export const fetchBookings = () => {
 export const CheckOccupancy = () => {
   return axios.get(`${Api_Endpoint}/Booking/CheckOccupancy`)
 }
-export const fetchGuestBilling = (id: any) => {
-  return axios.get(`${Api_Endpoint}/Billing/id?id=${id}`, id)
+export const fetchGuestBilling = (id: any,isCorporate:any,serviceType:any) => {
+  // console.log(serviceType)
+  // console.log(`${Api_Endpoint}/Billing/id?id=${id}&isCorporate=${isCorporate}&serviceType=[${serviceType}]`)
+  return axios.get(`${Api_Endpoint}/Billing/id?id=${id}&isCorporate=${isCorporate}&serviceType=[${serviceType}]`)
 }
 export const currencyConverterApi = (From: string, To: string) => {
   const headers = {
@@ -99,6 +107,9 @@ export const addGuestServiceApi = (values: any) => {
 }
 export const addGuestBilling = (values: any) => {
   return axios.post(`${Api_Endpoint}/Billing/`, values)
+}
+export const makeGuestBillingTransfer = (values: any) => {
+  return axios.post(`${Api_Endpoint}/Billing/BillingTransfer`, values)
 }
 export const nightAudit = (id: any) => {
   return axios.post(`${Api_Endpoint}/NightAudit?guestId=${id}`)
@@ -160,6 +171,9 @@ export const deleteServiceiceCategoryApi = (id: any) => {
 }
 export const deleteUserApi = (id: any) => {
   return axios.delete(`${Api_Endpoint}/users/${id}`, id)
+}
+export const deleteCompany = (id: any) => {
+  return axios.delete(`${Api_Endpoint}/company/id?id=${id}`, id)
 }
 
 export const deleteRoleApi = (id: any) => {

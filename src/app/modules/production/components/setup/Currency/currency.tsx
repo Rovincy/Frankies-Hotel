@@ -121,7 +121,7 @@ const Currency = () => {
     },
 
     {
-      title: 'isBase',
+      title: 'Base Currency',
       dataIndex: 'isBase',
       render: (isBase: boolean) => <Checkbox checked={isBase} />,
       sorter: (a: any, b: any) => {

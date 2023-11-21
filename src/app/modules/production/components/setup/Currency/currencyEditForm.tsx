@@ -156,7 +156,7 @@ const CurrencyEditForm= () =>{
               <input type="number"  {...register("symbol")} disabled={false} defaultValue={currencyData.symbol}  className="form-control form-control-solid" />
               </div>
               <div className='col-6 mb-7'>
-                <label htmlFor="exampleFormControlInput1" className="required form-label">isBase</label>
+                <label htmlFor="exampleFormControlInput1" className="required form-label">Base Currency</label>
                 <Checkbox{...register("isBase")} defaultChecked={currencyData.isBase==true?true:false}  className="form-control form-control-solid" onChange={(e) => setIsBase(e.target.checked)}/>
               </div>
             </div>

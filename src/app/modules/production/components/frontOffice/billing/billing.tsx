@@ -16,7 +16,7 @@ import {useEffect, useState} from 'react'
 import axios from 'axios'
 import {KTCardBody, KTSVG} from '../../../../../../_metronic/helpers'
 import {BASE_URL} from '../../../urls'
-import {Link, useNavigate, useParams} from 'react-router-dom'
+import {Link, useLocation, useNavigate,useParams} from 'react-router-dom'
 // import { employeedata } from '../../../../../data/DummyData'
 import {useQuery, useQueryClient, useMutation} from 'react-query'
 import {
@@ -24,11 +24,15 @@ import {
   GuestCheckoutApi,
   addGuestBilling,
   fetchActivePaymentMethods,
+  fetchCompanies,
   fetchCurrencies,
   fetchGuestBilling,
   fetchGuests,
+  fetchPaymentMethods,
+  fetchPaymentNotes,
   fetchRooms,
   fetchTaxes,
+  makeGuestBillingTransfer,
 } from '../../../../../services/ApiCalls'
 import Checkbox from 'antd/es/checkbox/Checkbox'
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns'
@@ -44,11 +48,18 @@ const Billing = () => {
   const [img, setImg] = useState()
   const [customData, setNewCustomData] = useState<any>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false)
+  const [isCompaniesDropdownOpen, setIsCompaniesDropdownOpen] = useState(false)
   const [openPaymentModal, setopenPaymentModal] = useState(false)
   const [openDebitModal, setopenDebitModal] = useState(false)
   const [openCreditModal, setopenCreditModal] = useState(false)
+  const [openTransferModal, setopenTransferModal] = useState(false)
+  const [serviceType, setServiceType] = useState("ALL_CHARGES")
   const {mutate: guestBilling} = useMutation((values: any) => addGuestBilling(values))
+  const {mutate: guestBillingTransfer} = useMutation((values: any) => makeGuestBillingTransfer(values))
   const {data: currencydata, isLoading: currencyLoad} = useQuery('currency', fetchCurrencies)
+  const {data: paymentNotedata, isLoading: paymentNoteLoad} = useQuery('paymentNote', fetchPaymentNotes)
+  const {data: companiesdata, isLoading: companiesLoad} = useQuery('companies', fetchCompanies)
   const {data: activePaymentMethoddata, isLoading: activePaymentMethodLoad} = useQuery('paymentMethod', fetchActivePaymentMethods)
   const {data: roomsdata, isLoading: roomsLoad} = useQuery('rooms', fetchRooms)
   const {data: guestdata, isLoading: guestLoad} = useQuery('guests', fetchGuests)
@@ -57,10 +68,7 @@ const Billing = () => {
   const parms: any = useParams()
   const {data: billingData, isLoading: billingLoad, refetch: refetchBillingData} = useQuery(
     ['AllGuestBillings', parms['*']],
-    () => fetchGuestBilling(parms['*']), // Pass the id as an argument
-    {
-      //   enabled: yourIdHere !== undefined, // You can enable or disable the query based on whether id is defined
-    }
+    () => fetchGuestBilling(parms['*'],isCompaniesDropdownOpen,serviceType),
   )
   const {currentUser} = useAuth()
   const [customerForm] = Form.useForm()
@@ -71,7 +79,13 @@ const Billing = () => {
   const {Text} = Typography
   const parms2: any = useParams()
   const navigate = useNavigate();
+  const location = useLocation()
   
+  // let userData : any = location?.state
+  let userData: any = location?.state || {};
+  // var serviceType = "ALL_CHARGES";
+  // console.log('userData: ',userData)
+  // console.log('userData: ',userData.guest)
 //   const guest = guestdata?.data.find((e:any)=>{
 //     return e?.id===parseInt(parms['*'])
 //   })
@@ -152,7 +166,12 @@ const Billing = () => {
   }
   totalConvertedCredit = parseFloat((parseFloat(totalCredit.toFixed(2)) * localRate).toFixed(2))
   totalConvertedDebit= parseFloat((parseFloat(totalDebit.toFixed(2)) * localRate).toFixed(2))
-  totalConvertedBalance= parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))<0?`(${parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))*(-1)})`:parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))
+  totalConvertedBalance= parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))<0?`(${Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))*(-1))})`:Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2)))
+  // totalConvertedBalance= parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))<0?`(${parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))*(-1)})`:parseFloat((parseFloat(totalBalance.toFixed(2)) * localRate).toFixed(2))
   convertedTaxedBalance = parseFloat((parseFloat(taxedBalance.toFixed(2)) * localRate).toFixed(2))
   // console.log('convertedTaxedBalance1: ',convertedTaxedBalance)
   // console.log('localRate',localRate)
@@ -233,7 +252,9 @@ const VAT_Taxes = taxdata?.data.map((item: any, index: number) => {
     return (
       <div key={index} style={{ textAlign: 'right', marginRight: '65px' }}>
         <p>
-          {item.name}: GHS {vat.toFixed(2)}
+          {item.name}: GHS {Intl.NumberFormat('en-US', {
+            currency: 'USD', // Change to your desired currency code
+          }).format(vat)}
         </p>
       </div>
     );
@@ -255,7 +276,9 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
     return (
       <div key={index} style={{ textAlign: 'right', marginRight: '65px' }}>
         <p>
-          {item.name}: GHS {levy.toFixed(2)}
+          {item.name}: GHS {Intl.NumberFormat('en-US', {
+            currency: 'USD', // Change to your desired currency code
+          }).format(levy)}
         </p>
       </div>
     );
@@ -385,6 +408,25 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
           message.success('Transaction deletion failed')
         }
         return response.status
+      },
+    })
+  }
+  const newBillTransfer = (value: any) => {
+    // console.log("Hello")
+    value.customerId = parms['*']
+    // value.isPayment = true
+    console.log(value)
+
+    guestBillingTransfer(value, {
+      onSuccess: () => {
+        message.success('Transfermade successfully!')
+        setopenTransferModal(false)
+        paymentForm.resetFields()
+        queryClient.invalidateQueries('AllGuestBillings')
+        queryClient.invalidateQueries('paymentMethod')
+      },
+      onError(error, variables, context) {
+        message.destroy('Error occurred while submitting payment')
       },
     })
   }
@@ -698,7 +740,8 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
     //   return
     // }
     var guestData = {
-      'id':parms2['*']
+      'id':parms2['*'],
+      'isCorporate':isCompaniesDropdownOpen
     }
     // console.log(value)
     // console.log("Hello World")
@@ -707,23 +750,31 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
     // console.log(customData)
     // console.log(parms2)
 
-    Modal.confirm({
-      okText: 'Confirm',
-      okType: 'primary',
-      title: 'Kindly confirm check-out!',
-      onOk: () => {
+    // Modal.confirm({
+    //   okText: 'Confirm',
+    //   okType: 'primary',
+    //   title: 'Kindly confirm check-out!',
+    //   onOk: () => {
         checkGuestOutQuery(guestData, {
           onSuccess: () => {
             message.success('Guest successfully ckecked out!')
+            // window.print()
             queryClient.invalidateQueries('currency')
             queryClient.invalidateQueries('rooms')
             queryClient.invalidateQueries('guests')
             queryClient.invalidateQueries('tax')
-            window.print()
           },
         })
-      },
-    })
+    //   },
+    // })
+  }
+  const printOut = (value:any) => {
+            window.print()
+  }
+  const goBack = (value:any) => {
+    // console.log("This")
+    // history.goBack();
+    navigate(-1);
   }
 
   const globalSearch = () => {
@@ -742,6 +793,7 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
     setopenPaymentModal(false)
     setopenDebitModal(false)
     setopenCreditModal(false)
+    setopenTransferModal(false)
   }
   const addPayment = () => {
     setopenPaymentModal(true)
@@ -752,6 +804,46 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
   const addCredit = () => {
     setopenCreditModal(true)
   }
+  const billTransfer = () => {
+    setopenTransferModal(true)
+  }
+
+  const handleLedgerTypeChange = (e:any) => {
+    // const selectedValue = e;
+    const selectedValue = e.target.value;
+    console.log('Selected value:', selectedValue);
+    if(selectedValue==="GUEST"){
+      setIsGuestDropdownOpen(true)
+      setIsCompaniesDropdownOpen(false)
+    }else{
+      setIsCompaniesDropdownOpen(true)
+      setIsGuestDropdownOpen(false)
+    }
+    // Add any other logic you want to perform on change
+  };
+  const handleServiceTypeChange = (e:any) => {
+    // console.log('Selected value:', e);
+    const selectedValue = e;
+    // console.log('Selected value:', selectedValue);
+    // if(selectedValue==="ALL_CHARGES"){
+      // serviceType = "ALL_CHARGES"
+      setServiceType(selectedValue)
+      // setIsGuestDropdownOpen(true)
+      // setIsCompaniesDropdownOpen(false)
+    // }else if(selectedValue==="ROOMS_ONLY"){
+    //   // serviceType = "ROOMS_ONLY"
+    //   setServiceType(selectedValue)
+    //   // setIsCompaniesDropdownOpen(true)
+    //   // setIsGuestDropdownOpen(false)
+    //   // newBillingData = newBillingData.filter((e:any) => e.description === 'Test Payment');
+    //   // console.log("Filtered Data:", filteredData);
+    // }else{
+    //   // serviceType = "SERVICES_ONLY"
+    //   setServiceType(selectedValue)
+    // }
+    // console.log("new newBillingData: ",newBillingData)
+    // Add any other logic you want to perform on change
+  };
 
   return (
     // <div
@@ -773,32 +865,65 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
     >
       <KTCardBody className='py-4 '>
         <div className='e-field'>
-          {/* <Link to='/roomType'>
-                <a
-                  style={{fontSize: '16px', fontWeight: '500'}}
-                  className='mb-7 btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary'
-                >
-                  Back to room type
-                </a>
-              </Link> */}
               
-              <div style={{display:'flex', flex:'start'}}>
-              <Form form={customerForm} style={{width:'40%'}}>
+        <div>
+              <Form form={customerForm}>
+              <Form.Item
+                name={'ledgerType'}
+                // label='Customer'
+                rules={[{required: true, message: 'Please select a ledger type'}]}
+                hasFeedback
+                style={{width: '10%'}}
+                labelCol={{span: 2}}
+              >
+                <select
+                    // {...register('account')}
+                    className='form-select form-select-solid'
+                    aria-label='Select example'
+                    onChange={(e) => handleLedgerTypeChange(e)}
+                    >
+                    <Select.Option>select </Select.Option>
+                    <option value='GUEST'>GUEST</option>
+                    <option value='CORPORATE'>CORPORATE</option>
+                 </select>
+              </Form.Item>
+            </Form>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {isCompaniesDropdownOpen===true?<div>
+              {Object.keys(userData).length > 0?<p style={{fontWeight:"bold"}}>{userData?.guest}</p>:(<Form form={customerForm}>
               <Form.Item
                 name={'guestId'}
                 // label='Customer'
-                rules={[{required: true, message: 'Please select a room'}]}
+                rules={[{required: true, message: 'Please select a company'}]}
                 hasFeedback
                 style={{width: '100%'}}
                 labelCol={{span: 5}}
               >
-                {/* <Select  
-                  isSearchable
-                  defaultValue={defaultSelect}
-                  // value={defaultSelect}
-                  onChange={handleChangeId}
-                  // styles={{:""}}
-                  options={guestListData}/> */}
+                <DropDownListComponent
+                  id='company'
+                  placeholder='Company'
+                  data-name='company'
+                  className='e-field'
+                  dataSource={companiesdata?.data}
+                  
+                  // value={9}
+                  fields={{text: 'name', value: 'id'}}
+                  onChange={custForm}
+                  style={{width: '100%'}}
+                />
+              </Form.Item>
+            </Form>)}
+              </div>:<div>
+              {Object.keys(userData).length > 0?<p style={{fontWeight:"bold"}}>{userData?.guest}</p>:(<Form form={customerForm}>
+              <Form.Item
+                name={'guestId'}
+                // label='Customer'
+                rules={[{required: true, message: 'Please select a guest'}]}
+                hasFeedback
+                style={{width: '100%'}}
+                labelCol={{span: 5}}
+              >
                 <DropDownListComponent
                   id='guest'
                   placeholder='Guest'
@@ -809,10 +934,38 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
                   // value={9}
                   fields={{text: 'name', value: 'id'}}
                   onChange={custForm}
-                  style={{width: '100%'}}
+                  // style={{width: '100%'}}
                 />
               </Form.Item>
+            </Form>)}
+              </div>}
+              <div>
+              <Form form={customerForm}>
+              <Form.Item
+                name={'serviceType'}
+                // label='Customer'
+                rules={[{required: true, message: 'Please select a service type'}]}
+                hasFeedback
+                style={{width: '100%'}}
+                labelCol={{span: 5}}
+              >
+                <Select
+                    // {...register('account')}
+                    mode="multiple"
+                    className='form-select form-select-solid'
+                    aria-label='Select example'
+                    onChange={(e) => handleServiceTypeChange(e)}>
+                    <Select.Option>select </Select.Option>
+                    <option value='ALL_CHARGES'>ALL CHARGES</option>
+                    <option value='ROOMS_ONLY'>ROOM ONLY</option>
+                    <option value='SERVICES_ONLY'>SERVICES ONLY</option>
+                    <option value='DEBIT_NOTES'>DEBIT NOTES</option>
+                    <option value='CREDIT_NOTES'>CREDIT NOTES</option>
+                </Select>
+              </Form.Item>
             </Form>
+              </div>
+          
               </div>
           <div className='d-flex justify-content-between'>
             {/* <Space style={{marginBottom: 16}}>
@@ -845,6 +998,7 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
           </div>
           <Table
             columns={columns}
+            // dataSource={newBillingData?.filter((e:any) => e.description.includes("Accommodation for Room"))}
             dataSource={newBillingData}
             loading={billingLoad}
             className='table-responsive'
@@ -867,11 +1021,15 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </Col>
             <Col span={2} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>USD {totalDebit.toFixed(2)}</Text>
+              <Text>USD {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(totalDebit)}</Text>
             </Col>
             <Col span={3} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>USD {totalCredit.toFixed(2)}</Text>
+              <Text>USD {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(totalCredit)}</Text>
             </Col>
             <Col span={1} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
@@ -893,11 +1051,15 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </Col>
             <Col span={4} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>GHS {totalConvertedDebit}</Text>
+              <Text>GHS {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(totalConvertedDebit)}</Text>
             </Col>
             <Col span={3} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
-              <Text>GHS {totalConvertedCredit}</Text>
+              <Text>GHS {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(totalConvertedCredit)}</Text>
             </Col>
             <Col span={1} style={{background:"none", textAlign:"end"}}>
               {/* <Text>{totalDebit}</Text> */}
@@ -932,19 +1094,25 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
           </Row>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             <Text style={{ textAlign: 'right', marginRight: '65px', marginTop:'10px' }}>
-            SALES AMOUNT: GHS {salesAmount?.toFixed(2)}
+            SALES AMOUNT: GHS {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(salesAmount)}
             </Text>
             <Text>
             {LEVY_Taxes}
             </Text>
             <Text style={{ textAlign: 'right', marginRight: '65px' }}>
-            SUB-TOTAL: GHS {(salesAmount+subTotal).toFixed(2)}
+            SUB-TOTAL: GHS {Intl.NumberFormat('en-US', {
+    currency: 'USD', // Change to your desired currency code
+  }).format(salesAmount+subTotal)}
             </Text>
             <Text>
             {VAT_Taxes}
             </Text>
             <Text style={{ textAlign: 'right', marginRight: '65px', fontWeight:'bold' }}>
-            GRAND TOTAL: GHS {totalConvertedDebit.toFixed(2)}
+            GRAND TOTAL: GHS {Intl.NumberFormat('en-US', {
+            currency: 'USD', // Change to your desired currency code
+          }).format(totalConvertedDebit)}
             </Text>
           </div>
           {/* <Row gutter={24}>
@@ -976,11 +1144,35 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </button>
           </Link>
         </Space>)}
+        {currentUser?.role.toString().toLocaleLowerCase()==="Cashier".toLowerCase()?null:(<Space style={{marginBottom: 16}}>
+          <Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3' onClick={billTransfer}>
+              <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
+              Transfer
+            </button>
+          </Link>
+        </Space>)}
         <Space style={{marginBottom: 16}}>
         {currentUser?.role.toString().toLocaleLowerCase()==="Manager".toLowerCase()?null:(<Link to={`#`}>
-            <button type='button' className='btn btn-primary me-3' onClick={(totalConvertedCredit-totalConvertedDebit)<0?settleRemainingBalance:checkGuestOut}>
+            <button type='button' className='btn btn-primary me-3' onClick={printOut}>
+              {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
+              Print
+            </button>
+          </Link>)}
+        </Space>
+        <Space style={{marginBottom: 16}}>
+        {currentUser?.role.toString().toLocaleLowerCase()==="Manager".toLowerCase()?null:(<Link to={`#`}>
+            <button type='button' className='btn btn-primary me-3' onClick={goBack}>
               {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
               Close
+            </button>
+          </Link>)}
+        </Space>
+        <Space style={{marginBottom: 16, paddingInlineStart:'40%'}}>
+        {currentUser?.role.toString().toLocaleLowerCase()==="Manager".toLowerCase()?null:(<Link to={`#`}>
+            <button type='button' className='btn btn-danger me-3' onClick={(totalConvertedCredit-totalConvertedDebit)<0?settleRemainingBalance:checkGuestOut}>
+              {/* <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' /> */}
+              Check Out
             </button>
           </Link>)}
           {/* <a
@@ -998,33 +1190,19 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </button>
           </Link> */}
         </Space>
+        {/* Transfer */}
         <Modal
-          open={openPaymentModal}
+          open={openTransferModal}
           okText='Confirm'
-          title='Add Payment'
+          title='Transfer'
           closable={true}
           onCancel={cancelBillModal}
           // onOk={handleOk}
           footer={null}
         >
-          <Form form={paymentForm} onFinish={newPayment}
+          <Form form={paymentForm} onFinish={newBillTransfer}
           layout='vertical'
           >
-            <Form.Item
-              name={'timestamp'}
-              label='Date'
-              rules={[{required: true, message: 'Please enter a date'}]}
-              hasFeedback
-              style={{width: '100%'}}
-              labelCol={{span: 5}}
-            >
-              <Input
-                type='date'
-                style={{width: '100%'}}
-                //   disabled={!priceValue}
-                //   onChange={onChangeForPrice}
-              />
-            </Form.Item>
             <Form.Item
               name={'description'}
               label='Description'
@@ -1041,7 +1219,7 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
               />
             </Form.Item>
             <Form.Item
-              name={'credit'}
+              name={'amount'}
               label='Payment'
               rules={[{required: true, message: 'Please enter amount'}]}
               hasFeedback
@@ -1086,6 +1264,167 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
                   // value={props && props.gameTypeId ? props.gameTypeId : null}
                   style={{width: '100%'}}
                 /> */}
+            </Form.Item>
+            <Form.Item
+              name={'receiverId'}
+              label='Guest to transfer bill to'
+              rules={[{required: true, message: 'Please select a guest'}]}
+              hasFeedback
+              // style={{width: '100%'}}
+              // labelCol={{span: 5}}
+            >
+              {/* <Select
+                  id='paymentMethod'
+                  name='paymentMethod'
+                  className='e-field'
+                  style={{ width: '100%' }}
+                >
+                  <option value='' disabled selected>
+                    paymentMethod
+                  </option>
+                  {activePaymentMethoddata?.data.map((item:any) => (
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </Select> */}
+                <Select
+                  id='receiverId'
+                  // name='paymentMethod'
+                  className='e-field'
+                  style={{ width: '100%' }}
+                  placeholder='Guests'
+                >
+                  {guestdata?.data.map((item:any) => (
+                  <Select.Option key={item.id} value={item.id}>
+                    {item.firstname} {item.lastname}
+                  </Select.Option>
+                ))}
+                              </Select>
+
+              {/* <DropDownListComponent
+                  id='paymentMethod'
+                  placeholder='paymentMethod'
+                  data-name='paymentMethod'
+                  className='e-field'
+                  dataSource={activePaymentMethoddata?.data}
+                  fields={{text: 'name', value: 'name'}}
+                  // value={props && props.gameTypeId ? props.gameTypeId : null}
+                  style={{width: '100%'}}
+                /> */}
+            </Form.Item>
+            <div style={{display: 'flex', justifyContent: 'end'}}>
+              <Button key='cancel' onClick={cancelBillModal} className='me-3'>
+                Cancel
+              </Button>
+              <Button key='confirm' type='primary' htmlType='submit'>
+                Confirm
+              </Button>
+            </div>
+          </Form>
+        </Modal>
+        {/* Payment */}
+        <Modal
+          open={openPaymentModal}
+          okText='Confirm'
+          title='Add Payment'
+          closable={true}
+          onCancel={cancelBillModal}
+          // onOk={handleOk}
+          footer={null}
+        >
+          <Form form={paymentForm} onFinish={newPayment}
+          layout='vertical'
+          >
+            <Form.Item
+              name={'timestamp'}
+              label='Date'
+              rules={[{required: true, message: 'Please enter a date'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='date'
+                style={{width: '100%'}}
+                //   disabled={!priceValue}
+                //   onChange={onChangeForPrice}
+              />
+            </Form.Item>
+            <Form.Item
+              name={'description'}
+              label='Description'
+              rules={[{required: true, message: 'Please enter description'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='text'
+                style={{width: '100%'}}
+                //   disabled={!priceValue}
+                //   onChange={onChangeForPrice}
+              />
+            </Form.Item>
+            <Form.Item
+              name={'Note'}
+              label='Note'
+              rules={[{required: true, message: 'Please select a note'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Select
+              id='currency'
+              // name='currency'
+              mode="multiple"
+              className='e-field'
+              style={{ width: '100%' }}
+              placeholder='Notes'
+            >
+              {paymentNotedata?.data.map((item:any) => (
+               item.isPayment?<Select.Option key={item.name} value={item.name}>
+                  {item.name}
+                </Select.Option>:''
+              ))}
+            </Select>
+            </Form.Item>
+            <Form.Item
+              name={'credit'}
+              label='Payment'
+              rules={[{required: true, message: 'Please enter amount'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Input
+                type='number'
+                style={{width: '100%'}}
+                //   disabled={!priceValue}
+                //   onChange={onChangeForPrice}
+              />
+            </Form.Item>
+            <Form.Item
+              name={'currency'}
+              label='Currency'
+              rules={[{required: true, message: 'Please select a currency'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Select
+              id='currency'
+              // name='currency'
+              className='e-field'
+              style={{ width: '100%' }}
+              placeholder='Currency'
+            >
+              {currencydata?.data.map((item:any) => (
+                <Select.Option key={item.symbol} value={item.symbol}>
+                  {item.symbol}
+                </Select.Option>
+              ))}
+            </Select>
             </Form.Item>
             <Form.Item
               name={'paymentMethod'}
@@ -1145,6 +1484,7 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </div>
           </Form>
         </Modal>
+        {/* Debit Note */}
         <Modal
           open={openDebitModal}
           okText='Confirm'
@@ -1184,6 +1524,29 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
               />
+            </Form.Item>
+            <Form.Item
+              name={'Note'}
+              label='Note'
+              rules={[{required: true, message: 'Please select a note'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Select
+              id='note'
+              // name='currency'
+              mode="multiple"
+              className='e-field'
+              style={{ width: '100%' }}
+              placeholder='Notes'
+            >
+              {paymentNotedata?.data.map((item:any) => (
+               item.isDebit?<Select.Option key={item.name} value={item.name}>
+                  {item.name}
+                </Select.Option>:''
+              ))}
+            </Select>
             </Form.Item>
             <Form.Item
               name={'debit'}
@@ -1229,6 +1592,7 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
             </div>
           </Form>
         </Modal>
+        {/* Credit Note */}
         <Modal
           open={openCreditModal}
           okText='Confirm'
@@ -1268,6 +1632,29 @@ const LEVY_Taxes = taxdata?.data.map((item: any, index: number) => {
                 //   disabled={!priceValue}
                 //   onChange={onChangeForPrice}
               />
+            </Form.Item>
+            <Form.Item
+              name={'Note'}
+              label='Note'
+              rules={[{required: true, message: 'Please select a note'}]}
+              hasFeedback
+              style={{width: '100%'}}
+              labelCol={{span: 5}}
+            >
+              <Select
+              id='currency'
+              // name='currency'
+              mode="multiple"
+              className='e-field'
+              style={{ width: '100%' }}
+              placeholder='Notes'
+            >
+              {paymentNotedata?.data.map((item:any) => (
+               item.isCredit?<Select.Option key={item.name} value={item.name}>
+                  {item.name}
+                </Select.Option>:''
+              ))}
+            </Select>
             </Form.Item>
             <Form.Item
               name={'credit'}

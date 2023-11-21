@@ -22,6 +22,7 @@ const EmployeeReportPage = () => {
           {/* <h2><span className="bullet me-5"></span><Link to="/RoomHistoryReport">Room Service History</Link></h2> */}
           <h2><span className="bullet me-5"></span><Link to="/ArrivalDepartureStayOverReport">Arrival Departure Stay Over</Link></h2>
           <h2><span className="bullet me-5"></span><Link to="/GuestLedgerReport">Guest Ledger</Link></h2>
+          <h2><span className="bullet me-5"></span><Link to="/GuestOutstandingReport">Guest Outstanding</Link></h2>
           {/* <h2><span className="bullet me-5"></span><Link to="/EmployeeDivisionReport">Division</Link></h2>
           <h2><span className="bullet me-5"></span><Link to="/EmployeeDivisionSummaryReport">Summary</Link></h2> */}
         </div>

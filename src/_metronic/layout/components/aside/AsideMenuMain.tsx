@@ -138,14 +138,14 @@ export function AsideMenuMain() {
           to='grm/Notes/'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen028.svg'
-          title='Notes (HR)'
+          title='Notes'
         />
-        <AsideMenuItem
+        {/* <AsideMenuItem
           to='#'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen028.svg'
           title='Loyalty'
-        />
+        /> */}
         {/* <AsideMenuItem 
             to='employee-report-page/' 
             hasBullet={false} 
@@ -212,18 +212,31 @@ export function AsideMenuMain() {
           title='Rooms'
         > */}
         {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()?null:(<AsideMenuItem
+          to='paymentNotes/'
+          hasBullet={false}
+          icon='/media/icons/duotune/general/gen005.svg'
+          title='Payment Notes'
+        />)}
+        {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()?null:(<AsideMenuItem
           to='paymentMethod/'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
           title='Payment Methods'
         />)}
-        {currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:<>(<AsideMenuItem
+        {currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<AsideMenuItem
           to='currency/'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
           title='Currency'
-        />)</>}
-        {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()||currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<><AsideMenuItem
+        />)}
+        {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()||currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<>
+        <AsideMenuItem
+          to='company/'
+          hasBullet={false}
+          icon='/media/icons/duotune/general/gen005.svg'
+          title='Company'
+        />
+        <AsideMenuItem
           to='tax/'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
@@ -248,7 +261,7 @@ export function AsideMenuMain() {
           icon='/media/icons/duotune/general/gen005.svg'
           title='Source'
         /> */}
-        {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()||currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<><AsideMenuItem
+        {/* {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()||currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<><AsideMenuItem
           to='/users'
           hasBullet={false}
           icon='/media/icons/duotune/general/gen005.svg'
@@ -256,7 +269,7 @@ export function AsideMenuMain() {
             to='#'
             hasBullet={false}
             icon='/media/icons/duotune/general/gen005.svg'
-            title='Roles' /></>)}
+            title='Roles' /></>)} */}
       </AsideMenuItemWithSub>
       
       {currentUser?.role.toLowerCase()==="Manager".toLocaleLowerCase()||currentUser?.role.toLowerCase()==="Cashier".toLocaleLowerCase()?null:(<AsideMenuItemWithSub

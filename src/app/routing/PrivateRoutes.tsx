@@ -93,6 +93,13 @@ import { PaymentMethodEditForm } from '../modules/production/components/setup/Pa
 import ArrivalDepartureStayOverReport from '../modules/production/components/report/ArrivalDepartureStayOverReport'
 import RoomHistoryReport from '../modules/production/components/report/EmployeeListReport'
 import GuestLedgerReport from '../modules/production/components/report/GuestLedgerReport'
+import GuestOutstandingReport from '../modules/production/components/report/GuestOutstandingReport'
+import { Company } from '../modules/production/components/setup/Company/company'
+import { CompanyForm } from '../modules/production/components/setup/Company/companyForm'
+import { CompanyEditForm } from '../modules/production/components/setup/Company/companyEditForm'
+import { PaymentNote } from '../modules/production/components/setup/PaymentNote/paymentNote'
+import { PaymentNoteForm } from '../modules/production/components/setup/PaymentNote/paymentNoteForm'
+import { PaymentNoteEditForm } from '../modules/production/components/setup/PaymentNote/paymentNoteEditForm'
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -234,6 +241,33 @@ const PrivateRoutes = () => {
             <SuspensedView>
               <PageTitle breadcrumbs={accountBreadCrumbs}>Edit Form</PageTitle>
               <PaymentMethodEditForm />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='paymentNotes/'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Payment Notes</PageTitle>
+              <PaymentNote />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='/paymentNotesForm'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Form</PageTitle>
+              <PaymentNoteForm />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='/paymentNotesEditForm'
+          element={
+            <SuspensedView>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit Form</PageTitle>
+              <PaymentNoteEditForm />
             </SuspensedView>
           }
         />
@@ -496,26 +530,8 @@ const PrivateRoutes = () => {
           path='report-page/*'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>All Employee Reports</PageTitle>
+              <PageTitle breadcrumbs={accountBreadCrumbs}>All Reports</PageTitle>
               <EmployeeReportPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='hr-report-page/*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>All Human Resource Reports</PageTitle>
-              <HrReportPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='payroll-report-page/*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>All Payroll Reports</PageTitle>
-              <PayrollReportPage />
             </SuspensedView>
           }
         />
@@ -707,278 +723,38 @@ const PrivateRoutes = () => {
           }
         />
         <Route
-          path='EmployeeAgeSummaryReport*'
+          path='company/'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>EmployeeAgeSummaryReport</PageTitle>
-              <EmployeeAgeSummaryReport />
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Company Setup</PageTitle>
+              <Company />
             </SuspensedView>
           }
         />
         <Route
-          path='report/HumanRessourceReport*'
+          path='/Company/CompanyForm'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>HumanRessourceReport</PageTitle>
-              <HumanRessourceReport />
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Form</PageTitle>
+              <CompanyForm />
             </SuspensedView>
           }
         />
         <Route
-          path='EmployeeFamilyReport*'
+          path='/Company/companyEditForm/'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>EmployeeFamilyReport</PageTitle>
-              <EmployeeFamilyReport />
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Edit Form</PageTitle>
+              <CompanyEditForm />
             </SuspensedView>
           }
         />
         <Route
-          path='EmployeeFamilySummaryReport*'
+          path='GuestOutstandingReport/*'
           element={
             <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                Employee Family Member Summary Report
-              </PageTitle>
-              <EmployeeFamilySummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='EmployeeDivisionReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>Employee Division Report</PageTitle>
-              <EmployeeDivisionReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='EmployeeDivisionSummaryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                Employee Division Summary Report
-              </PageTitle>
-              <EmployeeDivisionSummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='LeaveEmployeeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>LeaveEmployeeReport</PageTitle>
-              <LeaveEmployeeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='LeaveSummaryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>LeaveSummaryReport</PageTitle>
-              <LeaveSummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='LeaveDepartmentReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>LeaveDepartmentReport</PageTitle>
-              <LeaveDepartmentReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='NoteCategoryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>NoteCategoryReport</PageTitle>
-              <NoteCategoryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='NotesEmployeeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>NotesEmployeeReport</PageTitle>
-              <NotesEmployeeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='NotesSummaryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>NotesSummaryReport</PageTitle>
-              <NotesSummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='RecruitmentSelectionReferenceReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                RecruitmentSelectionReferenceReport
-              </PageTitle>
-              <RecruitmentSelectionReferenceReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='RecruitmentSelectJobTitleRepor*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>RecruitmentSelectJobTitleRepor</PageTitle>
-              <RecruitmentSelectJobTitleRepor />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='AppraisalPerformanceByAppraisalTypeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                AppraisalPerformanceByAppraisalTypeReport
-              </PageTitle>
-              <AppraisalPerformanceByAppraisalTypeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='AppraisalPerformanceByEmployeeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                AppraisalPerformanceByEmployeeReport
-              </PageTitle>
-              <AppraisalPerformanceByEmployeeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='CompensationBenefitByEmployeeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                CompensationBenefitByEmployeeReport
-              </PageTitle>
-              <CompensationBenefitByEmployeeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='CompensationBenefitByDepartmentReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                CompensationBenefitByDepartmentReport
-              </PageTitle>
-              <CompensationBenefitByDepartmentReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='CompensationBenefitByJobTitleReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                CompensationBenefitByJobTitleReport
-              </PageTitle>
-              <CompensationBenefitByJobTitleReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='TrainingDevelopmentByReferenceReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                TrainingDevelopmentByReferenceReport
-              </PageTitle>
-              <TrainingDevelopmentByReferenceReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='TrainingDevelopmentBySummaryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                TrainingDevelopmentBySummaryReport
-              </PageTitle>
-              <TrainingDevelopmentBySummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='TrainingDevelopmentByTrainingTypeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                TrainingDevelopmentByTrainingTypeReport
-              </PageTitle>
-              <TrainingDevelopmentByTrainingTypeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='MedicalEmployeeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>MedicalEmployeeReport</PageTitle>
-              <MedicalEmployeeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='MedicalTypeReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>MedicalTypeReport</PageTitle>
-              <MedicalTypeReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='MedicalSummaryReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>MedicalSummaryReport</PageTitle>
-              <MedicalSummaryReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='report/PayrollLoansDetailsReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>PayrollLoansDetailsReport</PageTitle>
-              <PayrollLoansDetailsReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='report/PayrollSSNITReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>PayrollSSNITReport</PageTitle>
-              <PayrollSSNITReport />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path='report/SavSchemeTransactionInputReport*'
-          element={
-            <SuspensedView>
-              <PageTitle breadcrumbs={accountBreadCrumbs}>
-                SavSchemeTransactionInputReport
-              </PageTitle>
-              <SavSchemeTransactionInputReport />
+              <PageTitle breadcrumbs={accountBreadCrumbs}>Guest Outstanding Report</PageTitle>
+              <GuestOutstandingReport />
             </SuspensedView>
           }
         />

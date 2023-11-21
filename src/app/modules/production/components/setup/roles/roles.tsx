@@ -181,12 +181,12 @@ const Roles = () => {
       <KTCardBody className='py-4 '>
         <div className='table-responsive'>
           <div className='d-flex justify-content-between'>
-            <Space style={{marginBottom: 16}}>
+            {/* <Space style={{marginBottom: 16}}>
               <Input placeholder='Enter Search Text' type='text' allowClear value={searchText} />
               <Button type='primary' onClick={globalSearch}>
                 Search
               </Button>
-            </Space>
+            </Space> */}
             <Space style={{marginBottom: 16}}>
             <Link to='/rolesForm'>
                 <button type='button' className='btn btn-primary me-3'>

@@ -13,7 +13,7 @@ import '@syncfusion/ej2-popups/styles/material.css'
 import '@syncfusion/ej2-splitbuttons/styles/material.css'
 import '@syncfusion/ej2-react-schedule/styles/material.css'
 import '@syncfusion/ej2-buttons/styles/material.css'
-import {Alert, message, Space, Spin, Modal} from 'antd'
+import {Alert, message, Space, Spin, Modal,Switch,Table } from 'antd'
 import axios from 'axios'
 import {L10n,createElement} from '@syncfusion/ej2-base'
 import { ScheduleComponent,Month,Day,Week, ViewsDirective, ViewDirective, TimelineViews,TimelineMonth, Inject, ResourcesDirective, ResourceDirective, Resize, DragAndDrop } from '@syncfusion/ej2-react-schedule';
@@ -49,7 +49,7 @@ const Calendar = () => {
   const {mutate: CancelBooking} = useMutation((values)=>axios.delete(`${BASE_URL}/Booking/${values}`))
   const {mutate: addNewGuestBooking} = useMutation((values)=>axios.post(`${BASE_URL}/Booking/NewGuestBooking`,values))
   const [calendFinalData,setCalendFinalData]=useState([])
-
+  const [isSwitchOn, setSwitchOn] = useState(false);
   // console.log('Guests ',guestsdata)
   // console.log('Guests ',guestsdata?.data[0])
   // console.log('Rooms ',roomsdata?.data[0])
@@ -63,6 +63,100 @@ const Calendar = () => {
   }
   
 });
+
+
+var color="#006400"
+const listViewData = roomsdata?.data.map((e)=>{
+  var roomType
+  var bookStart
+  var bookEnd
+  var guest
+
+  roomsTypes?.data.map((rType)=>{
+    if(rType.id===e.typeId){
+      // console.log("rType: ",rType)
+      roomType =  rType.name
+    }
+  })
+  bookingdata?.data.map((bookingElement)=>{
+    var bookStartTime = new Date(bookingElement?.bookStart)
+    var bookEndTime = new Date(bookingElement?.bookEnd)
+    if(bookingElement.roomId===e.id&&e.isActive===true){
+      guestsdata?.data.map((guestElement)=>{
+        if(guestElement.id===bookingElement.guestId){
+          guest = `${guestElement?.firstname.trim()} ${guestElement?.lastname.trim()}`
+        }
+      })
+      const currentDate = new Date(dayjs()); // Assuming you have the current date
+      if (currentDate >= bookStartTime && currentDate <= bookEndTime) {
+        console.log('The current date is between bookStart and bookEnd.',bookingElement.checkInTime);
+        // console.log(bookingElement)
+        // You can add your actions here if the condition is true.
+        if(bookingElement.checkInTime!==null){
+          //blue
+          color="#000080"
+          //   console.log(e.name)
+          // console.log(e.name)
+          // console.log(bookingElement.bookStart)
+          // console.log(bookingElement.checkInTime)
+          // console.log(bookingElement)
+        }else{
+          //orange
+          color="#ff8c00"
+        }
+      } 
+      else {
+        //Green
+        color="#006400"
+        // console.log('The current date is not between bookStart and bookEnd.','',`${e.name}`,'',`${bookStartTime}`,' ',`${bookEndTime}`);
+        // You can add your actions here if the condition is false.
+      }
+      bookStart= bookStartTime.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+      bookEnd= bookEndTime.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        // year: 'numeric',
+        // month: '2-digit',
+        // day: '2-digit',
+        // hour: '2-digit',
+        // minute: '2-digit',
+        // second: '2-digit',
+      })
+    }
+    // else if(bookingElement.roomId!==e.id&&e.isActive===false){
+    //   color="#8B0000"
+    // }
+  })
+  if(e.isActive===false){
+    //Red
+    color="#8B0000"
+  }
+  
+  return {
+    roomId: e.id,
+    name: e.name,
+    roomType: roomType,
+    guest: guest,
+    bookStart: bookStart,
+    bookEnd: bookEnd,
+    color:color
+
+  }
+})
+// console.log(listViewData)
 // let filteredBookings = []
   // const allBookings = bookingdata?.data.map((item) => {
   //   const allGuests = guestsdata?.data?.filter((data) => {
@@ -509,7 +603,7 @@ const Calendar = () => {
 // }
 
   const footerTemplate = (props) => {
-    console.log("props", props);
+    // console.log("props", props);
     return (
         <div className="quick-info-footer">
 
@@ -572,12 +666,132 @@ const Calendar = () => {
         //     args.Data.Subject = (args.Data.Subject == "Add title") ? "New event" : args.Data.Subject;   //The default subject is changed from Add Title to New event
         // }
     }
+    const handleSwitchChange = (checked) => {
+      setSwitchOn(checked);
+    };
+    const columns = [
+      {
+        // title: 'Room',
+        dataIndex: '',
+        sorter: (a, b) => {
+          if (a.color > b.color) {
+            return 1
+          }
+          if (b.color > a.color) {
+            return -1
+          }
+          return 0
+        },
+        render: (text, record) => (
+          <div style={{ backgroundColor: record.color, width: '30px', height: '30px',borderRadius: '50%' }}></div>
+        ),
+      },
+      {
+        title: 'Room',
+        dataIndex: 'name',
+        sorter: (a, b) => {
+          if (a.Subject > b.Subject) {
+            return 1
+          }
+          if (b.Subject > a.Subject) {
+            return -1
+          }
+          return 0
+        },
+      },
+      {
+        title: 'RoomType',
+        dataIndex: 'roomType',
+        sorter: (a, b) => {
+          if (a.Subject > b.Subject) {
+            return 1
+          }
+          if (b.Subject > a.Subject) {
+            return -1
+          }
+          return 0
+        },
+      },
+      {
+        title: 'Guest',
+        dataIndex: 'guest',
+        sorter: (a, b) => {
+          if (a.Subject > b.Subject) {
+            return 1
+          }
+          if (b.Subject > a.Subject) {
+            return -1
+          }
+          return 0
+        },
+      },
+      {
+        title: 'Arrival',
+        dataIndex: 'bookStart',
+        sorter: (a, b) => {
+          if (a.bookEnd > b.bookEnd) {
+            return 1
+          }
+          if (b.bookEnd > a.bookEnd) {
+            return -1
+          }
+          return 0
+        },
+      },
+      {
+        title: 'Departure',
+        dataIndex: 'bookEnd',
+        sorter: (a, b) => {
+          if (a.bookEnd > b.bookEnd) {
+            return 1
+          }
+          if (b.bookEnd > a.bookEnd) {
+            return -1
+          }
+          return 0
+        },
+      },
+  
+      // {
+      //   title: 'Action',
+      //   fixed: 'right',
+      //   width: 20,
+      //   render: (_,record) => (
+      //     <Space size='middle'>
+      //       {/* <Link to={`/services/details/${record.id}`}>
+      //         <a href='#' className='btn btn-light-primary btn-sm'>
+      //           Edit
+      //         </a>
+      //       </Link> */}
+      //       {/* <Link to={`/employee-edit-form/${record.id}`}> */}
+      //       <a
+      //         href='#'
+      //         className='btn btn-light-danger btn-sm'
+      //         onClick={() => deleteRole(record.id)}
+      //       >
+      //         Delete
+      //       </a>
+      //     </Space>
+      //   ),
+      // },
+    ]
 
   return roomsdata !== undefined ? (
     <div className='schedule-control-section'>
       <div className='col-lg-12 control-section'>
         <div className='control-wrapper'>
-        <ScheduleComponent 
+        <Switch
+        checked={isSwitchOn}
+        onChange={handleSwitchChange}
+        // You can customize other properties here, such as size, style, and more.
+      />
+      <p>{isSwitchOn ? 'Booking List View' : 'Booking Calendar View'}</p>
+       {isSwitchOn?<Table
+            columns={columns}
+            dataSource={listViewData}
+            loading={bookingsLoad}
+            className='table-responsive'
+          />:<ScheduleComponent 
           cssClass='timeline-resource' 
           // dateFormat='dd MM yyyy'
           currentView='TimelineMonth'
@@ -643,6 +857,7 @@ const Calendar = () => {
                             name='MeetingRoom'
                             allowMultiple={true}
                             dataSource={roomsArr}
+                            load={bookingsLoad}
                             textField='roomName'
                             idField='roomId'
                             >
@@ -657,6 +872,7 @@ const Calendar = () => {
                         </ViewsDirective>
                         <Inject services={[TimelineViews,TimelineMonth,Week, Month, Resize, DragAndDrop]}/>
                     </ScheduleComponent>
+        }
         </div>
       </div>
     </div>

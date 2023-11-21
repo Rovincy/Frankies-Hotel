@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 import './formStyle.css'
 import type {RcFile, UploadFile, UploadProps} from 'antd/es/upload/interface'
 import {UploadOutlined} from '@ant-design/icons'
-import {Button, Upload} from 'antd'
+import {Button, Select, Upload} from 'antd'
 import {
   BANKS,
   CATEGORY,
@@ -17,26 +17,27 @@ import {
 } from '../../../../data/DummyData'
 import {useForm} from 'react-hook-form'
 import axios from 'axios'
-import {Api_Endpoint} from '../../../../services/ApiCalls'
+import {Api_Endpoint,fetchCompanies} from '../../../../services/ApiCalls'
 import {useQuery} from 'react-query'
 import {useNavigate, Navigate} from 'react-router-dom'
 
 const GuestMultiTabForm = () => {
   const [formData, setFormData] = useState({})
-  const [activeTab, setActiveTab] = useState('tab1')
+  // const [activeTab, setActiveTab] = useState('tab1')
+  const {data: CompanyData, isLoading: CompanyLoading} = useQuery('Company', fetchCompanies)
   const {register, reset, handleSubmit} = useForm()
   const [loading, setLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<any>(null)
-  const handleTabClick = (tab: any) => {
-    setActiveTab(tab)
-  }
+  // const handleTabClick = (tab: any) => {
+  //   setActiveTab(tab)
+  // }
 
   const navigate = useNavigate()
 
-  const handleTabChange = (newTab: any) => {
-    setActiveTab(newTab)
-  }
+  // const handleTabChange = (newTab: any) => {
+  //   setActiveTab(newTab)
+  // }
 
   const [fileList, setFileList] = useState<UploadFile[]>([])
 
@@ -54,11 +55,16 @@ const GuestMultiTabForm = () => {
     let src = file.url
 
     if (!src) {
-      src = await new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(file.originFileObj)
-        reader.onload = () => resolve(reader.result)
-      })
+      src = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(file.originFileObj);
+    })
+      // src = await new Promise((resolve) => {
+      //   const reader = new FileReader()
+      //   reader.readAsDataURL(file.originFileObj)
+      //   reader.onload = () => resolve(reader.result)
+      // })
     }
 
     const image = new Image()
@@ -102,12 +108,13 @@ const GuestMultiTabForm = () => {
   const OnSubmit = handleSubmit(async (values, event) => {
     event?.preventDefault()
     setLoading(true)
-
+    console.log(values)
     const formData = new FormData()
     formData.append('firstName', values.firstName)
     formData.append('lastname', values.lastname)
     formData.append('email', values.email)
-    formData.append('account', values.account)
+    // formData.append('account', values.account)
+    values.companyId?.trim()===""?formData.append('account', values.account):formData.append('companyId',values.companyId)
     formData.append('gender', values.gender)
     formData.append('dob', values.dob)
     formData.append('phoneNumber', values.phoneNumber)
@@ -161,8 +168,7 @@ const GuestMultiTabForm = () => {
         {/* <form onSubmit={OnSUbmit}> */}
         <div className='tab-content'>
           {/* Details */}
-          {activeTab === 'tab1' && (
-            <div className='col-12'>
+          <div className='col-12'>
               <div className='row mb-0'>
                 <div className='col-6 mb-7'>
                   <Upload
@@ -171,8 +177,7 @@ const GuestMultiTabForm = () => {
                     onChange={onChange}
                     onPreview={onPreview}
                     multiple={false}
-                   
-                  >
+                  ><span>Document</span>
                     {/* <UploadOutlined /> */}
                   </Upload>
                 </div>
@@ -212,9 +217,9 @@ const GuestMultiTabForm = () => {
               <div className='row mb-0'>
                 <div className='col-4 mb-7'>
                   <label htmlFor='exampleFormControlInput1' className=' form-label'>
-                    Account
+                    Company
                   </label>
-                  <select
+                  {/* <select
                     {...register('account')}
                     className='form-select form-select-solid'
                     aria-label='Select example'
@@ -224,7 +229,22 @@ const GuestMultiTabForm = () => {
                     <option value='UN'>UN</option>
                     <option value='WHO'>WHO</option>
                     <option value='MICROSOFT'>MICROSOFT</option>
-                  </select>
+                  </select> */}
+                  <select
+              id='companyId'
+              {...register('companyId')}
+              // mode="multiple"
+              className='form-select form-select-solid'
+              style={{ width: '100%' }}
+              placeholder='Company'
+            >
+              <option></option>
+              {CompanyData?.data.map((item:any) => 
+               <option key={item?.name} value={item?.id}>
+                  {item?.name}
+                </option>
+              )}
+            </select>
                 </div>
                 <div className='col-4 mb-7'>
                   <label htmlFor='exampleFormControlInput1' className='required form-label'>
@@ -275,7 +295,7 @@ const GuestMultiTabForm = () => {
                   >
                     <option>select </option>
                     <option value='PASSPORT'>PASSPORT</option>
-                    <option value='LICENCE'>LICENCE</option>
+                    <option value='LICENCE'>DRIVER'S LICENCE</option>
                     <option value='NATIONAL ID'>NATIONAL ID</option>
                   </select>
                 </div>
@@ -304,7 +324,6 @@ const GuestMultiTabForm = () => {
                 </div>
               </div>
             </div>
-          )}
         </div>
         <button className='btn btn-primary' onClick={OnSubmit} type='submit'>
           Submit

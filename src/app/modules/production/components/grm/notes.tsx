@@ -217,9 +217,9 @@ const Notes = () => {
     }
   }
 
-  const globalSearch = () => {
+  const globalSearch = (searchText:any) => {
     // @ts-ignore
-    filteredData = dataWithIndex.filter((value) => {
+    filteredData = testData.filter((value) => {
       return (
         value.name.toLowerCase().includes(searchText.toLowerCase()) ||
         value.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -251,16 +251,17 @@ const Notes = () => {
         <div className='table-responsive'>
           <div className='d-flex justify-content-between'>
             <Space style={{marginBottom: 16}}>
-              <Input
+              {/* <Input
                 placeholder='Enter Search Text'
-                onChange={handleInputChange}
+                onChange={globalSearch}
+                // onChange={handleInputChange}
                 type='text'
                 allowClear
-                value={searchText}
-              />
-              <Button type='primary' onClick={globalSearch}>
+                // value={searchText}
+              /> */}
+              {/* <Button type='primary' onClick={globalSearch}>
                 Search
-              </Button>
+              </Button> */}
             </Space>
             <Space style={{marginBottom: 16}}>
               {/* <Link to='/guest-form'>
@@ -270,10 +271,10 @@ const Notes = () => {
               </button>
               </Link> */}
 
-              <button type='button' className='btn btn-light-primary me-3'>
+              {/* <button type='button' className='btn btn-light-primary me-3'>
                 <KTSVG path='/media/icons/duotune/arrows/arr078.svg' className='svg-icon-2' />
                 Export
-              </button>
+              </button> */}
             </Space>
           </div>
           <Table columns={columns} dataSource={testData} loading={NotesLoad} />

@@ -2,7 +2,7 @@ import React from 'react';
 
 function CustomEventTooltip(props: { event: any; }) {
   const { event } = props;
-  console.log("Hello World");
+  // console.log("Hello World");
   return (
     <div className="custom-event-tooltip">
       <div className="event-subject">{event.Subject}</div>

@@ -6,7 +6,7 @@ import {BASE_URL} from '../../urls'
 import {Link} from 'react-router-dom'
 // import { employeedata } from '../../../../../data/DummyData'
 import {QueryClient, useMutation, useQuery, useQueryClient} from 'react-query'
-import {Api_Endpoint, addNoteApi, deleteGuestApi, fetchGuests} from '../../../../services/ApiCalls'
+import {Api_Endpoint, addNoteApi, deleteGuestApi, fetchCompanies, fetchGuests} from '../../../../services/ApiCalls'
 import Checkbox from 'antd/es/checkbox/Checkbox'
 import TextArea from 'antd/es/input/TextArea'
 
@@ -20,11 +20,54 @@ const Guests = () => {
   const [img, setImg] = useState()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const {data: getGuest, isLoading: guestsLoad} = useQuery('guests', fetchGuests)
+  const {data: getCompanies, isLoading: companiesLoad} = useQuery('companies', fetchCompanies)
   const [openNoteModal, setOpenNoteModal] = useState(false)
   const {data: addGuestNote} = useMutation((values: any) => addNoteApi(values))
   const {mutate: guestDeletion} = useMutation((id: any) => deleteGuestApi(id))
   const queryClient = useQueryClient()
-  // const {data: roomsTypedata, isLoading: roomsTypeLoad} = useQuery('roomsType', fetchRoomsTypes)
+
+
+  var guestAndCompanies = getGuest?.data.map((e:any)=>{
+  var comp =  getCompanies?.data.map((c:any)=>{
+    // console.log("c: ",c)
+    // console.log("e: ",e)
+    if (c.id===e.companyId) {
+      // console.log("True")
+      return {
+          id: c.id,
+          name:c.name
+        }
+      }
+    })
+    console.log("comp: ",comp)
+    console.log("comp.name: ",comp[0]?.name)
+    return {
+      id:e.id,
+      company:e.company,
+      companyId:e.companyId,
+      companyName:comp[0]?.name,
+      dob:e.dob,
+      docUrl:e.docUrl,
+      email:e.email,
+      firstname:e.firstname,
+      gender:e.gender,
+      guestServices:e.guestServices,
+      account:e.account,
+      billingCustomerIdTransferedFromNavigations:e.billingCustomerIdTransferedFromNavigations,
+      billingCustomers:e.billingCustomers,
+      billingsHistoryCustomerIdTransferedFromNavigations:e.billingsHistoryCustomerIdTransferedFromNavigations,
+      billingsHistoryCustomers:e.billingsHistoryCustomers,
+      bookings:e.bookings,
+      idnumber:e.idnumber,
+      idtype:e.idType,
+      lastname:e.lastname,
+      nationality:e.nationality,
+      notes:e.notes,
+      phoneNumber:e.phoneNumber
+    }
+})
+// const {data: roomsTypedata, isLoading: roomsTypeLoad} = useQuery('roomsType', fetchRoomsTypes)
+console.log("guestAndCompanies: ",guestAndCompanies)
 
   // roomsTypedata?.data.find(roomTypedata => {
   //   if(roomTypedata.id==roo)
@@ -136,13 +179,13 @@ const Guests = () => {
       },
     },
     {
-      title: 'Account',
-      dataIndex: 'account',
+      title: 'Company',
+      dataIndex: 'companyName',
       sorter: (a: any, b: any) => {
-        if (a.account > b.account) {
+        if (a.companyName > b.companyName) {
           return 1
         }
-        if (b.account > a.account) {
+        if (b.companyName > a.companyName) {
           return -1
         }
         return 0
@@ -315,32 +358,32 @@ const Guests = () => {
         <div className='table-responsive'>
           <div className='d-flex justify-content-between'>
             <Space style={{marginBottom: 16}}>
-              <Input
+              {/* <Input
                 placeholder='Enter Search Text'
                 onChange={handleInputChange}
                 type='text'
                 allowClear
                 value={searchText}
-              />
-              <Button type='primary' onClick={globalSearch}>
+              /> */}
+              {/* <Button type='primary' onClick={globalSearch}>
                 Search
-              </Button>
+              </Button> */}
             </Space>
             <Space style={{marginBottom: 16}}>
-              <Link to='/guest-form'>
+               <Link to='/guest-form'>
                 <button type='button' className='btn btn-primary me-3'>
                   <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
                   Add
                 </button>
               </Link>
-
+              {/*
               <button type='button' className='btn btn-light-primary me-3'>
                 <KTSVG path='/media/icons/duotune/arrows/arr078.svg' className='svg-icon-2' />
                 Export
-              </button>
+              </button> */}
             </Space>
           </div>
-          <Table columns={columns} dataSource={getGuest?.data} loading={guestsLoad} />
+          <Table columns={columns} dataSource={guestAndCompanies} loading={guestsLoad} />
         </div>
         {/* Notes Modal */}
         <Modal

@@ -361,7 +361,7 @@ const RoomType = () => {
         <div className='table-responsive'>
           <div className='d-flex justify-content-between'>
             <Space style={{marginBottom: 16}}>
-              <Input
+              {/* <Input
                 placeholder='Enter Search Text'
                 onChange={handleInputChange}
                 type='text'
@@ -370,7 +370,7 @@ const RoomType = () => {
               />
               <Button type='primary' onClick={globalSearch}>
                 Search
-              </Button>
+              </Button> */}
             </Space>
             <Space style={{marginBottom: 16}}>
               <Link to='/roomTypeForm'>
@@ -380,10 +380,10 @@ const RoomType = () => {
                 </button>
               </Link>
 
-              <button type='button' className='btn btn-light-primary me-3'>
+              {/* <button type='button' className='btn btn-light-primary me-3'>
                 <KTSVG path='/media/icons/duotune/arrows/arr078.svg' className='svg-icon-2' />
                 Export
-              </button>
+              </button> */}
             </Space>
           </div>
           <Table columns={columns} dataSource={roomsdata?.data} loading={roomsLoad} />

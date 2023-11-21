@@ -182,22 +182,22 @@ const Category = () => {
       <KTCardBody className='py-4 '>
         <div className='table-responsive'>
           <div className='d-flex justify-content-between'>
-            <Space style={{marginBottom: 16}}>
+            {/* <Space style={{marginBottom: 16}}>
               <Input placeholder='Enter Search Text' type='text' allowClear value={searchText} />
               <Button type='primary' onClick={globalSearch}>
                 Search
               </Button>
-            </Space>
+            </Space> */}
             <Space style={{marginBottom: 16}}>
               <button type='button' className='btn btn-primary me-3' onClick={() => showModal()}>
                 <KTSVG path='/media/icons/duotune/arrows/arr075.svg' className='svg-icon-2' />
                 Add
               </button>
 
-              <button type='button' className='btn btn-light-primary me-3'>
+              {/* <button type='button' className='btn btn-light-primary me-3'>
                 <KTSVG path='/media/icons/duotune/arrows/arr078.svg' className='svg-icon-2' />
                 Export
-              </button>
+              </button> */}
             </Space>
           </div>
           <Table

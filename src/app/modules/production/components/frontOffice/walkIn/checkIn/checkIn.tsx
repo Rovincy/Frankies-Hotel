@@ -240,9 +240,9 @@ const CheckIn = () => {
   const displayTransferModal = (value: any) => {
     // const { roomId, bookEnd } = formData;
     tableValue = value
-    console.log(tableValue)
-    console.log('tableValue: ', tableValue['bookStart'])
-    console.log('tableValue: ', tableValue['bookEnd'])
+    // console.log(tableValue)
+    // console.log('tableValue: ', tableValue['bookStart'])
+    // console.log('tableValue: ', tableValue['bookEnd'])
     selectedItemBookEnd = tableValue['bookEnd']
     // formData.bookStart = tableValue['bookStart']
     formData.customerId = tableValue['guestId']
@@ -511,23 +511,34 @@ const CheckIn = () => {
           {/* <Link to={`/Billing/${record.guestId}`} className='btn btn-light-primary btn-sm'>
             Check Out
           </Link> */}
-          <a
+          <Link
+          to={`/Billing/${record.guestId}`}
+          state={record}
+          className='btn btn-light-primary btn-sm'
+          onClick={() =>
+            runNightAudit(record.guestId, {
+              onSuccess: () => {
+                navigate(`/Billing/${record.guestId}`, { replace: true });
+              },
+            })
+          }
+        >
+          Check Out
+        </Link>
+          {/* <a
             href='#'
             className='btn btn-light-primary btn-sm'
             onClick={() =>
               runNightAudit(record.guestId, {
                 onSuccess: () => {
-                  // message.success('Audit run successfully')
-                  navigate(`/Billing/${record.guestId}`, {replace: true})
-                  // queryClient.invalidateQueries('Bookings')
-                  // queryClient.invalidateQueries('Guests')
-                  // queryClient.invalidateQueries('rooms')
+                  navigate(`/Billing/${record.guestId}`,{replace: true})
                 },
               })
             }
           >
             Check Out
-          </a>
+          </a> */}
+
           {/* <a
             href='#'
             className='btn btn-light-primary btn-sm'

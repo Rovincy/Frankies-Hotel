@@ -143,10 +143,10 @@ const WalkInPlanning = () => {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
         <button style={{ flex: 1, height: '100%',border: 'none', backgroundColor: 'transparent', fontWeight: 'bold', fontSize: '16px', color: activeButton === 'checkout' ? '#fff' : '#333', cursor: 'pointer' }} onClick={() => handleButtonClick('checkout')}>Check Out</button>
       </div>
-      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
+      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
         <Text style={{ fontWeight: 'bold', fontSize: '16px'}}>Occupied: {roomAvailability?.data["occupiedRooms"]}</Text>
         </div>
-      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: activeButton === 'checkout' ? '#1e1e2d' : '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
+      <div style={{ display: 'flex',paddingInlineStart:"10px", justifyContent: 'center', alignItems: 'center', height: '50px',width:'200px', backgroundColor: '#f5f5f5', borderRadius: '8px',marginLeft: '10px' }}>
         <Text style={{ fontWeight: 'bold', fontSize: '16px'}}>Vacant: {roomAvailability?.data["vacantRooms"]}</Text>
         </div>
           {/* <Space style={{marginBottom: 16}}>
